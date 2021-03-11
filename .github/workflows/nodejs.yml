@@ -12,9 +12,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ fork-master ]
   pull_request:
-    branches: [ master ]
+    branches: [ fork-master ]
 
 env:
   NODEJS_VERSION: 10.x
@@ -51,7 +51,7 @@ jobs:
     - run: npm run generate
     - run: npm run test -- test/fast/*
     - run: npm run test -- test/client/*
-    
+
   test-slow-integration:
     runs-on: ubuntu-latest
 
