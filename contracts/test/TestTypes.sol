@@ -39,4 +39,8 @@ contract TestTypes {
         committer = batch.committer();
         finaliseOn = batch.finaliseOn();
     }
+
+    function hashTransferBody(Types.TransferBody memory body) external pure returns (bytes32) {
+        return Types.toHash(body);
+    }
 }

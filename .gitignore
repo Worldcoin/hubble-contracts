@@ -4,4 +4,6 @@ genesis.json
 types/
 cache/
 artifacts/
+.idea
+.vscode
 build/
