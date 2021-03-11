@@ -4,6 +4,8 @@ genesis.json
 types/ethers-contracts/
 cache/
 artifacts/
+.idea
+.vscode
 build/
 docker/testData
 leveldb/
