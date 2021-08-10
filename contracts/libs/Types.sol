@@ -205,6 +205,14 @@ library Types {
         pure
         returns (bytes memory)
     {
+        if (
+            state.pubkeyID == 0 &&
+            state.tokenID == 0 &&
+            state.balance == 0 &&
+            state.nonce == 0
+        ) {
+            return abi.encode(0);
+        }
         return
             abi.encodePacked(
                 state.pubkeyID,
