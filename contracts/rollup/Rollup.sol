@@ -177,6 +177,32 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         return _domainSeparatorV4();
     }
 
+    function submitMassC2T(
+        bytes32 stateRoot,
+        uint256 senderIdx,
+        uint256[] receiverIdxs,
+        L2Amount amount,
+        address senderL1Address,
+        uint256[2] signature
+    ) {
+        bytes32 commitementBody = keccak256(abi.encode(
+            senderIdx,
+            receiverIdxs,
+            amount,
+            senderL1Address,
+        ));
+
+        bytes32 commitement = keccak256(abi.encode(
+            stateRoot,
+            commitementBody
+        ));
+
+        // Same effect as `MerkleTree.merklize`
+        bytes32 root = keccak256(abi.encode(commitement, ZERO_BYTES32));
+        // Does account root matter?
+        submitBatch(root, 1, bytes32(0), Types.Usage.MassC2T);
+    }
+
     /**
      * @dev This function should be highly optimized so that it can include as many commitments as possible
      */
