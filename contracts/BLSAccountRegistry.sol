@@ -35,9 +35,9 @@ contract BLSAccountRegistry is AccountTree {
     }
 
     function registerBatch(uint256[4][BATCH_SIZE] calldata pubkeys)
-    external
-    onlyCoordinator
-    returns (uint256)
+        external
+        onlyCoordinator
+        returns (uint256)
     {
         bytes32[BATCH_SIZE] memory leafs;
         for (uint256 i = 0; i < BATCH_SIZE; i++) {
