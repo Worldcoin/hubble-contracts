@@ -1,4 +1,5 @@
 import {
+    ProofOfBurn__factory,
     TestTransfer,
     TestTransfer__factory,
     BLSAccountRegistry__factory
@@ -32,9 +33,11 @@ describe("Rollup Transfer Commitment", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
+        const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
+        await proofOfBurn.deployed();
         const registryContract = await new BLSAccountRegistry__factory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
 
         registry = await AccountRegistry.new(registryContract);
         users = Group.new({ n: 32, domain: DOMAIN });

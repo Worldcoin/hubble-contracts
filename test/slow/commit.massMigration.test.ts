@@ -5,11 +5,11 @@ import { StateTree } from "../../ts/stateTree";
 import { hexToUint8Array, randHex } from "../../ts/utils";
 import {
     BLSAccountRegistry__factory,
+    ProofOfBurn__factory,
     TestMassMigration,
     TestMassMigration__factory
 } from "../../types/ethers-contracts";
 import * as mcl from "../../ts/mcl";
-import {} from "../../types/ethers-contracts/TestMassMigration";
 import { serialize } from "../../ts/tx";
 import { assert } from "chai";
 import { Result } from "../../ts/interfaces";
@@ -37,9 +37,11 @@ describe("Rollup Mass Migration", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
+        const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
+        await proofOfBurn.deployed();
         const registryContract = await new BLSAccountRegistry__factory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
 
         registry = await AccountRegistry.new(registryContract);
         users = Group.new({ n: 32, domain: DOMAIN });

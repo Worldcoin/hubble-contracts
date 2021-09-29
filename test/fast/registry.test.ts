@@ -1,6 +1,7 @@
 import {
     BLSAccountRegistry,
-    BLSAccountRegistry__factory
+    BLSAccountRegistry__factory,
+    ProofOfBurn__factory
 } from "../../types/ethers-contracts";
 
 import { Hasher } from "../../ts/tree";
@@ -34,7 +35,13 @@ describe("Registry", async () => {
     beforeEach(async function() {
         await mcl.init();
         const accounts = await ethers.getSigners();
-        registry = await new BLSAccountRegistry__factory(accounts[0]).deploy();
+        const proofOfBurn = await new ProofOfBurn__factory(
+            accounts[0]
+        ).deploy();
+        await proofOfBurn.deployed();
+        registry = await new BLSAccountRegistry__factory(accounts[0]).deploy(
+            proofOfBurn.address
+        );
         DEPTH = (await registry.DEPTH()).toNumber();
         BATCH_DEPTH = (await registry.BATCH_DEPTH()).toNumber();
         hasher = Hasher.new("bytes", ZERO_BYTES32);

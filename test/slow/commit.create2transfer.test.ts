@@ -1,5 +1,6 @@
 import {
     BLSAccountRegistry__factory,
+    ProofOfBurn__factory,
     TestCreate2Transfer,
     TestCreate2Transfer__factory
 } from "../../types/ethers-contracts";
@@ -34,9 +35,11 @@ describe("Rollup Create2Transfer Commitment", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
+        const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
+        await proofOfBurn.deployed();
         const registryContract = await new BLSAccountRegistry__factory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
         registry = await AccountRegistry.new(registryContract);
         const nUsersWithStates = 32;
         const nUserWithoutState = nUsersWithStates;

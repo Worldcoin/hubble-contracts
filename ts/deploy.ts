@@ -79,7 +79,7 @@ export async function deployAll(
 
     const blsAccountRegistry = await new BLSAccountRegistry__factory(
         signer
-    ).deploy();
+    ).deploy(chooserAddress);
     await waitAndRegister(blsAccountRegistry, "blsAccountRegistry", verbose);
 
     // deploy Token registry contract
