@@ -13,6 +13,7 @@ import { Result } from "../../ts/interfaces";
 import { Group, txTransferFactory } from "../../ts/factory";
 import { STATE_TREE_DEPTH, COMMIT_SIZE } from "../../ts/constants";
 import { deployKeyless } from "../../ts/deployment/deploy";
+import { ProofOfBurnFactory } from "../../types/ethers-contracts";
 
 const DOMAIN_HEX = randHex(32);
 const DOMAIN = hexToUint8Array(DOMAIN_HEX);
@@ -30,9 +31,11 @@ describe("Rollup Transfer Commitment", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
+        const proofOfBurn = await new ProofOfBurnFactory(signer).deploy();
+        await proofOfBurn.deployed();
         const registryContract = await new BlsAccountRegistryFactory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
 
         registry = await AccountRegistry.new(registryContract);
         users = Group.new({ n: 32, domain: DOMAIN });

@@ -7,6 +7,7 @@ import * as mcl from "../../ts/mcl";
 import { ethers } from "hardhat";
 import { assert } from "chai";
 import { ZERO_BYTES32 } from "../../ts/constants";
+import { ProofOfBurnFactory } from "../../types/ethers-contracts";
 
 let DEPTH: number;
 let BATCH_DEPTH: number;
@@ -28,7 +29,11 @@ describe("Registry", async () => {
     beforeEach(async function() {
         await mcl.init();
         const accounts = await ethers.getSigners();
-        registry = await new BlsAccountRegistryFactory(accounts[0]).deploy();
+        const proofOfBurn = await new ProofOfBurnFactory(accounts[0]).deploy();
+        await proofOfBurn.deployed();
+        registry = await new BlsAccountRegistryFactory(accounts[0]).deploy(
+            proofOfBurn.address
+        );
         DEPTH = (await registry.DEPTH()).toNumber();
         BATCH_DEPTH = (await registry.BATCH_DEPTH()).toNumber();
         hasher = Hasher.new("bytes", ZERO_BYTES32);
