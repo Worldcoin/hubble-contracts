@@ -3,14 +3,29 @@ pragma solidity ^0.6.12;
 
 import { AccountTree } from "./AccountTree.sol";
 import { BLS } from "./libs/BLS.sol";
+import { Chooser } from "./proposers/Chooser.sol";
 
 /**
     @dev For gas efficiency reason, public key itself is not logged in events but is
     expected to be parsed from the calldata.
  */
 contract BLSAccountRegistry is AccountTree {
+    Chooser public immutable chooser;
+
     event SinglePubkeyRegistered(uint256 pubkeyID);
     event BatchPubkeyRegistered(uint256 startID, uint256 endID);
+
+    constructor(Chooser _chooser) public {
+        chooser = _chooser;
+    }
+
+    modifier onlyCoordinator() {
+        require(
+            msg.sender == chooser.getProposer(),
+            "BLSAccountRegistry: Invalid proposer"
+        );
+        _;
+    }
 
     function register(uint256[4] calldata pubkey) external returns (uint256) {
         bytes32 leaf = keccak256(abi.encodePacked(pubkey));
@@ -21,6 +36,7 @@ contract BLSAccountRegistry is AccountTree {
 
     function registerBatch(uint256[4][BATCH_SIZE] calldata pubkeys)
         external
+        onlyCoordinator
         returns (uint256)
     {
         bytes32[BATCH_SIZE] memory leafs;

@@ -13,6 +13,7 @@ import { Group, txCreate2TransferFactory } from "../../ts/factory";
 import { STATE_TREE_DEPTH } from "../../ts/constants";
 import { deployKeyless } from "../../ts/deployment/deploy";
 import { hashPubkey } from "../../ts/pubkey";
+import { ProofOfBurnFactory } from "../../types/ethers-contracts";
 
 const DOMAIN_HEX = randHex(32);
 const DOMAIN = hexToUint8Array(DOMAIN_HEX);
@@ -31,9 +32,11 @@ describe("Rollup Create2Transfer Commitment", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
+        const proofOfBurn = await new ProofOfBurnFactory(signer).deploy();
+        await proofOfBurn.deployed();
         const registryContract = await new BlsAccountRegistryFactory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
         registry = await AccountRegistry.new(registryContract);
         const nUsersWithStates = 32;
         const nUserWithoutState = nUsersWithStates;
