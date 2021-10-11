@@ -146,7 +146,7 @@ export class MassMigrationCommitment extends Commitment {
         feeReceiver: number,
         stateProvider: StateProvider
     ) {
-        const states = [];
+        const states: State[] = [];
         for (const tx of txs) {
             const origin = stateProvider.getState(tx.fromIndex).state;
             const destination = State.new(
@@ -296,7 +296,7 @@ export class TransferBatch extends Batch {
             feeReceivers,
             txss
         } = txDescription.args;
-        const commitments = [];
+        const commitments: TransferCommitment[] = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const commitment = new TransferCommitment(
                 stateRoots[i],
@@ -337,7 +337,7 @@ export class MassMigrationBatch extends Batch {
             withdrawRoots,
             txss
         } = txDescription.args;
-        const commitments = [];
+        const commitments: MassMigrationCommitment[] = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const [spokeID, tokenID, amount, feeReceiver] = meta[i];
             const commitment = new MassMigrationCommitment(
@@ -388,7 +388,7 @@ export class Create2TransferBatch extends Batch {
             feeReceivers,
             txss
         } = txDescription.args;
-        const commitments = [];
+        const commitments: Create2TransferCommitment[] = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const commitment = new Create2TransferCommitment(
                 stateRoots[i],

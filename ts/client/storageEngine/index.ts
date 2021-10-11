@@ -1,5 +1,7 @@
-export { PubkeyMemoryEngine, PubkeyStorageEngine } from "./pubkeyEngine";
+export { PubkeyMemoryEngine } from "./pubkeyEngine";
+export type { PubkeyStorageEngine } from "./pubkeyEngine";
 
-export { StateMemoryEngine, StateStorageEngine } from "./stateEngine";
+export { StateMemoryEngine } from "./stateEngine";
+export type { StateStorageEngine } from "./stateEngine";
 
-export { StorageManager } from "./storageManager";
+export type { StorageManager } from "./storageManager";

@@ -57,7 +57,7 @@ export function randomNum(numBytes: number): number {
 }
 
 export function randomLeaves(num: number): string[] {
-    const leaves = [];
+    const leaves: string[] = [];
     for (let i = 0; i < num; i++) {
         leaves.push(randHex(32));
     }
