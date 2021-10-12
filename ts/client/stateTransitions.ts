@@ -90,7 +90,7 @@ export async function processTransferCommit(
             await processTransfer(tx, tokenID, engine);
             engine.commit();
             acceptedTxs.push(tx);
-        } catch (err) {
+        } catch (err: any) {
             console.log("Drop tx due to ", err.message);
             engine.revert(checkpoint);
         }
