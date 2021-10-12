@@ -1,2 +1,4 @@
-export { Hasher, Node } from "./hasher";
-export { Tree, Data, Witness } from "./tree";
+export { Hasher } from "./hasher";
+export type { Node } from "./hasher";
+export { Tree } from "./tree";
+export type { Data, Witness } from "./tree";

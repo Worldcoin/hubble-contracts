@@ -12,7 +12,7 @@ export function hashToField(
 ): BigNumber[] {
     const u = 48;
     const _msg = expandMsg(domain, msg, count * u);
-    const els = [];
+    const els: BigNumber[] = [];
     for (let i = 0; i < count; i++) {
         const el = BigNumber.from(_msg.slice(i * u, (i + 1) * u)).mod(
             FIELD_ORDER

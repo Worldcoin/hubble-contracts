@@ -107,7 +107,7 @@ export class Group {
     }
     // Useful when want to divide users into sub-groups
     public *groupInterator(subgroupSize: number) {
-        let subgroup = [];
+        let subgroup: User[] = [];
         for (const user of this.users) {
             subgroup.push(user);
             if (subgroup.length == subgroupSize) {
@@ -122,7 +122,7 @@ export class Group {
         return { user, index };
     }
     public join(other: Group) {
-        const allUsers = [];
+        const allUsers: User[] = [];
         for (const user of this.userIterator()) {
             allUsers.push(user);
         }
@@ -186,7 +186,7 @@ export function txTransferFactory(
     n: number
 ): { txs: TxTransfer[]; signature: solG1; senders: User[] } {
     const txs: TxTransfer[] = [];
-    const senders = [];
+    const senders: User[] = [];
     const seenNonce: { [stateID: number]: number } = {};
     for (let i = 0; i < n; i++) {
         const sender = group.getUser(i % group.size);
@@ -219,7 +219,7 @@ export function txCreate2TransferFactory(
     unregistered: Group
 ): { txs: TxCreate2Transfer[]; signature: solG1; senders: User[] } {
     const txs: TxCreate2Transfer[] = [];
-    const senders = [];
+    const senders: User[] = [];
     const seenNonce: { [stateID: number]: number } = {};
     const n = Math.max(registered.size, unregistered.size);
     for (let i = 0; i < n; i++) {
@@ -255,7 +255,7 @@ export function txMassMigrationFactory(
     spokeID = 0
 ): { txs: TxMassMigration[]; signature: solG1; senders: User[] } {
     const txs: TxMassMigration[] = [];
-    const senders = [];
+    const senders: User[] = [];
     const seenNonce: { [stateID: number]: number } = {};
     for (const sender of group.userIterator()) {
         const senderState = group.getState(sender);

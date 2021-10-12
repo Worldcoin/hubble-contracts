@@ -61,7 +61,7 @@ export function serialize(txs: Tx[]): string {
 }
 
 export function getAggregateSig(txs: SignableTx[]): solG1 {
-    const signatures = [];
+    const signatures: SignatureInterface[] = [];
     for (const tx of txs) {
         if (!tx.signature) throw new Error(`tx has no signautre ${tx}`);
         signatures.push(tx.signature);
@@ -81,7 +81,7 @@ export class TxTransfer implements SignableTx {
     }
 
     public static buildList(n: number = COMMIT_SIZE): TxTransfer[] {
-        const txs = [];
+        const txs: TxTransfer[] = [];
         for (let i = 0; i < n; i++) {
             txs.push(TxTransfer.rand());
         }
@@ -161,7 +161,7 @@ export class TxMassMigration implements SignableTx {
         return new TxMassMigration(sender, amount, spokeID, fee, nonce);
     }
     public static buildList(n: number = COMMIT_SIZE): TxMassMigration[] {
-        const txs = [];
+        const txs: TxMassMigration[] = [];
         for (let i = 0; i < n; i++) {
             txs.push(TxMassMigration.rand());
         }
@@ -249,7 +249,7 @@ export class TxCreate2Transfer implements SignableTx {
         );
     }
     public static buildList(n: number = COMMIT_SIZE): TxCreate2Transfer[] {
-        const txs = [];
+        const txs: TxCreate2Transfer[] = [];
         for (let i = 0; i < n; i++) {
             txs.push(TxCreate2Transfer.rand());
         }
