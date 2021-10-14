@@ -43,7 +43,7 @@
     "chai-as-promised": "^7.1.1",
     "hardhat": "^2.2.1",
     "minimist": "^1.2.5",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.0",
     "prettier-plugin-solidity": "1.0.0-beta.10",
     "solhint": "^3.3.4",
     "ts-node": "^9.1.1",
