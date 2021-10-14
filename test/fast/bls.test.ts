@@ -16,12 +16,12 @@ const g2PointOnIncorrectSubgroup = [
     "0x1ef4bf0d452e71f1fb23948695fa0a87a10f3d9dce9d32fadb94711f22566fb5",
     "0x237536b6a72ac2e447e7b34a684a81d8e63929a4d670ce1541730a7e03c3f0f2",
     "0x0a63f14620a64dd39394b6e89c48679d3f2ce0c46a1ef052ee3df0bd66c198cb",
-    "0x0fe4020ece1b2849af46d308e9f201ac58230a45e124997f52c65d28fe3cf8f1"
+    "0x0fe4020ece1b2849af46d308e9f201ac58230a45e124997f52c65d28fe3cf8f1",
 ];
 
 describe("BLS", async () => {
     let bls: TestBls;
-    before(async function() {
+    before(async function () {
         const signer = ethers.provider.getSigner();
         await deployKeyless(signer, false, { PairingGasEstimators: true });
         await mcl.init();
@@ -29,7 +29,7 @@ describe("BLS", async () => {
         bls = await new TestBlsFactory(accounts[0]).deploy();
         await bls.deployed();
     });
-    it("map to point", async function() {
+    it("map to point", async function () {
         for (let i = 0; i < 100; i++) {
             const e = randFs();
             const [expectX, expectY] = mcl.g1ToHex(mcl.mapToPoint(e));
@@ -38,7 +38,7 @@ describe("BLS", async () => {
             assert.equal(to32Hex(actualY), expectY, "e " + e);
         }
     });
-    it("expand message to 96", async function() {
+    it("expand message to 96", async function () {
         for (let i = 0; i < 100; i++) {
             const msg = randomBytes(i);
             const expected = expandMsg(DOMAIN, msg, 96);
@@ -46,7 +46,7 @@ describe("BLS", async () => {
             assert.equal(result, hexlify(expected));
         }
     });
-    it("hash to field", async function() {
+    it("hash to field", async function () {
         for (let i = 0; i < 100; i++) {
             const msg = randomBytes(i);
             const [expectX, expectY] = hashToField(DOMAIN, msg, 2);
@@ -55,7 +55,7 @@ describe("BLS", async () => {
             assert.equal(actualY.toHexString(), expectY.toHexString());
         }
     });
-    it("hash to point", async function() {
+    it("hash to point", async function () {
         for (let i = 0; i < 100; i++) {
             const msg = randHex(i);
             const [expectX, expectY] = mcl.g1ToHex(
@@ -66,7 +66,7 @@ describe("BLS", async () => {
             assert.equal(to32Hex(actualY), expectY);
         }
     });
-    it("verify aggregated signature", async function() {
+    it("verify aggregated signature", async function () {
         const n = 10;
         const messages = [];
         const pubkeys = [];
@@ -92,7 +92,7 @@ describe("BLS", async () => {
             assert.isTrue(checkResult, `check failed i=${i}`);
         }
     });
-    it("verify aggregated signature: fail bad signature", async function() {
+    it("verify aggregated signature: fail bad signature", async function () {
         const n = 10;
         const messages = [];
         const pubkeys = [];
@@ -116,7 +116,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isTrue(res[1]);
     });
-    it("verify aggregated signature: fail signature is not on curve", async function() {
+    it("verify aggregated signature: fail signature is not on curve", async function () {
         const n = 10;
         const messages = [];
         const pubkeys = [];
@@ -132,7 +132,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isFalse(res[1]);
     });
-    it("verify aggregated signature: fail pubkey is not on curve", async function() {
+    it("verify aggregated signature: fail pubkey is not on curve", async function () {
         const n = 10;
         const messages = [];
         const pubkeys = [];
@@ -158,7 +158,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isFalse(res[1]);
     });
-    it("verify aggregated signature: fail pubkey is not on correct subgroup", async function() {
+    it("verify aggregated signature: fail pubkey is not on correct subgroup", async function () {
         const n = 10;
         const messages = [];
         const pubkeys = [];
@@ -186,7 +186,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isFalse(res[1]);
     });
-    it("verify single signature", async function() {
+    it("verify single signature", async function () {
         const message = randHex(12);
         const { pubkey, secret } = mcl.newKeyPair();
         const { signature, messagePoint } = mcl.sign(message, secret, DOMAIN);
@@ -198,7 +198,7 @@ describe("BLS", async () => {
         assert.isTrue(res[0]);
         assert.isTrue(res[1]);
     });
-    it("verify single signature: fail bad signature", async function() {
+    it("verify single signature: fail bad signature", async function () {
         const message = randHex(12);
         const { pubkey } = mcl.newKeyPair();
         const { secret } = mcl.newKeyPair();
@@ -211,7 +211,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isTrue(res[1]);
     });
-    it("verify single signature: fail pubkey is not on curve", async function() {
+    it("verify single signature: fail pubkey is not on curve", async function () {
         const message = randHex(12);
         const { secret } = mcl.newKeyPair();
         const { signature, messagePoint } = mcl.sign(message, secret, DOMAIN);
@@ -224,7 +224,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isFalse(res[1]);
     });
-    it("verify single signature: fail signature is not on curve", async function() {
+    it("verify single signature: fail signature is not on curve", async function () {
         const message = randHex(12);
         const { pubkey, secret } = mcl.newKeyPair();
         const { messagePoint } = mcl.sign(message, secret, DOMAIN);
@@ -237,7 +237,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isFalse(res[1]);
     });
-    it("verify single signature: fail pubkey is not on correct subgroup", async function() {
+    it("verify single signature: fail pubkey is not on correct subgroup", async function () {
         const message = randHex(12);
         const { secret } = mcl.newKeyPair();
         const { signature, messagePoint } = mcl.sign(message, secret, DOMAIN);
@@ -251,7 +251,7 @@ describe("BLS", async () => {
         assert.isFalse(res[0]);
         assert.isFalse(res[1]);
     });
-    it("is on curve g1", async function() {
+    it("is on curve g1", async function () {
         for (let i = 0; i < 20; i++) {
             const point = mcl.randG1();
             let isOnCurve = await bls.isOnCurveG1(point);
@@ -263,7 +263,7 @@ describe("BLS", async () => {
             assert.isFalse(isOnCurve);
         }
     });
-    it("is on curve g2", async function() {
+    it("is on curve g2", async function () {
         for (let i = 0; i < 20; i++) {
             const point = mcl.randG2();
             let isOnCurve = await bls.isOnCurveG2(point);
@@ -274,13 +274,13 @@ describe("BLS", async () => {
                 randomBytes(31),
                 randomBytes(31),
                 randomBytes(31),
-                randomBytes(31)
+                randomBytes(31),
             ];
             const isOnCurve = await bls.isOnCurveG2(point);
             assert.isFalse(isOnCurve);
         }
     });
-    it.skip("gas cost: verify signature", async function() {
+    it.skip("gas cost: verify signature", async function () {
         const n = 100;
         const messages = [];
         const pubkeys = [];
@@ -305,7 +305,7 @@ describe("BLS", async () => {
         );
         console.log(`verify signature for ${n} message: ${cost.toNumber()}`);
     });
-    it.skip("gas cost: verify single signature", async function() {
+    it.skip("gas cost: verify single signature", async function () {
         const message = randHex(12);
         const { pubkey, secret } = mcl.newKeyPair();
         const { signature, messagePoint } = mcl.sign(message, secret, DOMAIN);

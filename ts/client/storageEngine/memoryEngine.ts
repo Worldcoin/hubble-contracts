@@ -10,7 +10,8 @@ export interface Entry<Item> {
 }
 
 export class MemoryEngine<Item extends Hashable>
-    implements StorageEngine<Item> {
+    implements StorageEngine<Item>
+{
     public static new(depth: number) {
         return new this(depth);
     }
@@ -102,7 +103,7 @@ export class MemoryEngine<Item extends Hashable>
             const witness = this.tree.witness(i, level).nodes;
             return {
                 path: i,
-                witness
+                witness,
             };
         }
         throw new TreeAtLevelIsFull(

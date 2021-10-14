@@ -1,7 +1,7 @@
 import { Hubble } from "../ts/hubble";
 
 const argv = require("minimist")(process.argv.slice(2), {
-    string: ["url", "tokenID", "pubkeys", "amount"]
+    string: ["url", "tokenID", "pubkeys", "amount"],
 });
 
 /**
@@ -28,7 +28,7 @@ async function main() {
 
 main()
     .then(() => process.exit(0))
-    .catch(error => {
+    .catch((error) => {
         console.error(error);
         process.exit(1);
     });

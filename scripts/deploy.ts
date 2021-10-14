@@ -6,25 +6,18 @@ import { PRODUCTION_PARAMS } from "../ts/constants";
 import { StateTree } from "../ts/stateTree";
 import { Group } from "../ts/factory";
 
-const {
-    url,
-    root,
-    key,
-    input,
-    output,
-    numPubkeys,
-    pubkeyMnemonic
-} = require("minimist")(process.argv.slice(2), {
-    string: [
-        "url",
-        "root",
-        "key",
-        "input",
-        "output",
-        "numPubkeys",
-        "pubkeyMnemonic"
-    ]
-});
+const { url, root, key, input, output, numPubkeys, pubkeyMnemonic } =
+    require("minimist")(process.argv.slice(2), {
+        string: [
+            "url",
+            "root",
+            "key",
+            "input",
+            "output",
+            "numPubkeys",
+            "pubkeyMnemonic",
+        ],
+    });
 /*
     Note separate pubkeys with commas
     > npm run deploy -- --url http://localhost:8545 \
@@ -85,7 +78,7 @@ async function main() {
         );
         const group = Group.new({
             n: pubkeyMnemonic,
-            mnemonic: pubkeyMnemonic
+            mnemonic: pubkeyMnemonic,
         });
         // Convert this to batch register once implemented
         for (const user of group.userIterator()) {
@@ -99,7 +92,7 @@ main()
         console.log("Deployment complete");
         process.exit(0);
     })
-    .catch(err => {
+    .catch((err) => {
         console.error(err);
         process.exit(1);
     });

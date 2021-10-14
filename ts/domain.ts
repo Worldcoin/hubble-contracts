@@ -49,13 +49,13 @@ export const generateDomainSeparatorFromRollup = async (
     const [network, name, version] = await Promise.all([
         rollup.provider.getNetwork(),
         rollup.DOMAIN_NAME(),
-        rollup.DOMAIN_VERSION()
+        rollup.DOMAIN_VERSION(),
     ]);
 
     return getDomainSeparator({
         name,
         version,
         chainId: network.chainId,
-        verifyingContract: rollup.address
+        verifyingContract: rollup.address,
     });
 };

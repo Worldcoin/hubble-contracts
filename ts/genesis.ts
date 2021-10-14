@@ -18,7 +18,7 @@ import {
     DepositManagerFactory,
     RollupFactory,
     WithdrawManagerFactory,
-    BurnAuctionFactory
+    BurnAuctionFactory,
 } from "../types/ethers-contracts";
 import { execSync } from "child_process";
 
@@ -53,13 +53,11 @@ export class Genesis {
         });
 
         const domainSeparator = await contracts.rollup.domainSeparator();
-        const version = execSync("git rev-parse HEAD")
-            .toString()
-            .trim();
+        const version = execSync("git rev-parse HEAD").toString().trim();
         const auxiliary = {
             domain: domainSeparator,
             genesisEth1Block,
-            version
+            version,
         };
         return new this(parameters, addresses, auxiliary);
     }
@@ -85,7 +83,7 @@ export class Genesis {
             depositManager: DepositManagerFactory,
             rollup: RollupFactory,
             withdrawManager: WithdrawManagerFactory,
-            burnAuction: BurnAuctionFactory
+            burnAuction: BurnAuctionFactory,
         };
         const contracts: any = {};
         for (const [key, factory] of Object.entries(factories)) {

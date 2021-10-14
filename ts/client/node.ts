@@ -28,7 +28,7 @@ interface ClientConfigs {
 
 export enum NodeType {
     Syncer,
-    Proposer
+    Proposer,
 }
 
 export class HubbleNode {
@@ -46,7 +46,7 @@ export class HubbleNode {
             willingnessToBid: BigNumber.from(1),
             providerUrl: "http://localhost:8545",
             genesisPath: "./genesis.json",
-            rpcPort: 3000
+            rpcPort: 3000,
         };
 
         const genesis = Genesis.fromConfig(config.genesisPath);
@@ -58,7 +58,7 @@ export class HubbleNode {
         const { MAX_DEPTH } = genesis.parameters;
         const storageManager = await storageManagerFactory({
             stateTreeDepth: MAX_DEPTH,
-            pubkeyTreeDepth: MAX_DEPTH
+            pubkeyTreeDepth: MAX_DEPTH,
         });
 
         // Hardcoded for now, will be configurable in

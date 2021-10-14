@@ -6,14 +6,14 @@ import { StateTree } from "../../ts/stateTree";
 import { randomAddress } from "../../ts/utils";
 import {
     DepositManagerFactory,
-    RollupFactory
+    RollupFactory,
 } from "../../types/ethers-contracts";
 import { Rollup } from "../../types/ethers-contracts/Rollup";
 
 describe("Rollup", () => {
     let rollup: Rollup;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         const [signer] = await ethers.getSigners();
 
         const fakeAddress = randomAddress();
@@ -40,14 +40,12 @@ describe("Rollup", () => {
     });
 
     describe("domainSeparator", () => {
-        it("matches EIP-712 spec and has correct values", async function() {
-            const [
-                expectedDomainSeparator,
-                domainSeparator
-            ] = await Promise.all([
-                generateDomainSeparatorFromRollup(rollup),
-                rollup.domainSeparator()
-            ]);
+        it("matches EIP-712 spec and has correct values", async function () {
+            const [expectedDomainSeparator, domainSeparator] =
+                await Promise.all([
+                    generateDomainSeparatorFromRollup(rollup),
+                    rollup.domainSeparator(),
+                ]);
             assert.equal(domainSeparator, expectedDomainSeparator);
         });
     });

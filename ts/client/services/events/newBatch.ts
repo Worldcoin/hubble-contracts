@@ -67,7 +67,7 @@ export class NewBatchEventSyncer extends ContractEventSyncer {
                 finalized,
                 batchID,
                 l1TxnHash: event.transactionHash,
-                l1BlockIncluded
+                l1BlockIncluded,
             });
         }
 

@@ -9,22 +9,20 @@ import { computeRoot } from "../../ts/utils";
 
 chai.use(chaiAsPromised);
 
-const {
-    MAX_DEPTH: maxDepth,
-    MAX_DEPOSIT_SUBTREE_DEPTH: maxSubtreeDepth
-} = PRODUCTION_PARAMS;
+const { MAX_DEPTH: maxDepth, MAX_DEPOSIT_SUBTREE_DEPTH: maxSubtreeDepth } =
+    PRODUCTION_PARAMS;
 
 describe("StateMemoryEngine", () => {
     let engine: StateMemoryEngine;
     let states: State[];
-    beforeEach(async function() {
+    beforeEach(async function () {
         engine = new StateMemoryEngine(maxDepth);
         states = [];
         for (let i = 0; i < 20; i++) {
             states.push(State.new(i, i, i, i));
         }
     });
-    it("creates gets updates commits and reverts", async function() {
+    it("creates gets updates commits and reverts", async function () {
         const root0 = engine.root;
         for (let i = 0; i < 10; i++) {
             engine.create(i, states[i]);
@@ -52,7 +50,7 @@ describe("StateMemoryEngine", () => {
         const hasher = Hasher.new("bytes", ZERO_BYTES32);
         const zeroes = hasher.zeros(maxDepth);
 
-        it("finds first vacant subtree when empty", async function() {
+        it("finds first vacant subtree when empty", async function () {
             const { path, witness } = await engine.findVacantSubtree(
                 maxSubtreeDepth
             );
@@ -64,7 +62,7 @@ describe("StateMemoryEngine", () => {
             );
         });
 
-        it("finds next vacant subtree when first is filled", async function() {
+        it("finds next vacant subtree when first is filled", async function () {
             for (let i = 0; i < 2 ** maxSubtreeDepth; i++) {
                 await engine.update(i, states[i]);
             }
@@ -81,7 +79,7 @@ describe("StateMemoryEngine", () => {
             );
         });
 
-        it("finds next vacant subtree when first has cached items", async function() {
+        it("finds next vacant subtree when first has cached items", async function () {
             await engine.update(2, states[2]);
             await engine.update(5, states[5]);
 
@@ -96,7 +94,7 @@ describe("StateMemoryEngine", () => {
             );
         });
 
-        it("fails when tree is full", async function() {
+        it("fails when tree is full", async function () {
             const depth = 4;
             const smallTreeEngine = new StateMemoryEngine(depth);
             for (let i = 0; i < 2 ** depth; i++) {
@@ -112,7 +110,7 @@ describe("StateMemoryEngine", () => {
     });
 
     describe("updateBatch", () => {
-        it("updates items at correct itemID", async function() {
+        it("updates items at correct itemID", async function () {
             const subtreeID = 2;
             const items = states.slice(8, 12);
 

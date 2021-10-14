@@ -52,7 +52,7 @@ export class AccountRegistry {
             );
         const rigthIndex = await this.syncRightIndex();
         await this.registry.registerBatch(pubkeys);
-        const leaves = pubkeys.map(key => this.pubkeyToLeaf(key));
+        const leaves = pubkeys.map((key) => this.pubkeyToLeaf(key));
         this.treeRight.updateBatch(rigthIndex, leaves);
         const firstPubkeyID = rigthIndex + this.setSize;
         const lastPubkeyID = firstPubkeyID + length - 1;

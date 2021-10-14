@@ -9,7 +9,7 @@ import { mineBlocks } from "../../ts/utils";
 import { BurnAuctionFactory } from "../../types/ethers-contracts";
 import { BurnAuction } from "../../types/ethers-contracts/BurnAuction";
 
-describe("Bidder", function() {
+describe("Bidder", function () {
     let deployer: Signer;
     let serviceSigner: Signer;
     let competitor: Signer;
@@ -18,7 +18,7 @@ describe("Bidder", function() {
     let bidder: Bidder;
     const willingnessToBid = BigNumber.from("1");
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         [deployer, serviceSigner, competitor] = await ethers.getSigners();
         contract = await new BurnAuctionFactory(deployer).deploy(
             PRODUCTION_PARAMS.DONATION_ADDRESS,
@@ -34,7 +34,7 @@ describe("Bidder", function() {
         await mineBlocks(ethers.provider, nblocks);
     });
 
-    it("bids", async function() {
+    it("bids", async function () {
         const currentBlock = await ethers.provider.getBlockNumber();
         await bidder.maybeBid(currentBlock);
         assert.equal(
@@ -43,14 +43,14 @@ describe("Bidder", function() {
         );
     });
 
-    it("doesn't bid if already win", async function() {
+    it("doesn't bid if already win", async function () {
         await contract.connect(serviceSigner).bid("1", { value: "1" });
         const currentBlock = await ethers.provider.getBlockNumber();
         // bid would result an error and thus fail the test
         await bidder.maybeBid(currentBlock);
     });
 
-    it("doesn't bid if amount is too much", async function() {
+    it("doesn't bid if amount is too much", async function () {
         const amount = willingnessToBid.add("1");
         await contract.connect(competitor).bid(amount, { value: amount });
         const currentBlock = await ethers.provider.getBlockNumber();

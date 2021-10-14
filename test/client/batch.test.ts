@@ -3,7 +3,7 @@ import chaiAsPromised from "chai-as-promised";
 import { Batch, Commitment } from "../../ts/client/features/interface";
 import {
     BatchL1Transaction,
-    BatchStorage
+    BatchStorage,
 } from "../../ts/client/storageEngine/batches/interfaces";
 import { BatchMemoryStorage } from "../../ts/client/storageEngine/batches/memory";
 
@@ -26,7 +26,7 @@ describe("BatchMemoryStorage", () => {
     let l1Txn: BatchL1Transaction;
     let storage: BatchStorage;
 
-    before(function() {
+    before(function () {
         batches = [];
         for (let i = 0; i < 5; i++) {
             batches.push(new TestBatch(`fakeCommitmentRoot${i}`));
@@ -34,17 +34,17 @@ describe("BatchMemoryStorage", () => {
         l1Txn = { hash: "0x123456" };
     });
 
-    beforeEach(function() {
+    beforeEach(function () {
         storage = new BatchMemoryStorage();
     });
 
     describe("add", () => {
-        it("fails if batch was already added", async function() {
+        it("fails if batch was already added", async function () {
             await storage.add(batches[0], l1Txn);
             await assert.isRejected(storage.add(batches[0], l1Txn));
         });
 
-        it("multiple batches suceeds", async function() {
+        it("multiple batches suceeds", async function () {
             await storage.add(batches[0], l1Txn);
             await storage.add(batches[1], l1Txn);
 
@@ -54,11 +54,11 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("count", () => {
-        it("returns 0 with no batches", async function() {
+        it("returns 0 with no batches", async function () {
             assert.equal(storage.count(), 0);
         });
 
-        it("returns number of batches added", async function() {
+        it("returns number of batches added", async function () {
             await storage.add(batches[0], l1Txn);
             await storage.add(batches[1], l1Txn);
 
@@ -67,11 +67,11 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("getByID", () => {
-        it("returns undefined if batch not added", async function() {
+        it("returns undefined if batch not added", async function () {
             assert.isUndefined(await storage.getByID(0));
         });
 
-        it("returns correct batch", async function() {
+        it("returns correct batch", async function () {
             await storage.add(batches[0], l1Txn);
             await storage.add(batches[1], l1Txn);
             await storage.add(batches[2], l1Txn);
@@ -81,13 +81,13 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("getByCommitmentRoot", () => {
-        it("returns undefined if batch not added", async function() {
+        it("returns undefined if batch not added", async function () {
             assert.isUndefined(
                 await storage.getByCommitmentRoot(batches[0].commitmentRoot)
             );
         });
 
-        it("returns correct batch", async function() {
+        it("returns correct batch", async function () {
             await storage.add(batches[0], l1Txn);
             await storage.add(batches[1], l1Txn);
             await storage.add(batches[2], l1Txn);
@@ -100,11 +100,11 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("current", () => {
-        it("returns undefined if batch not added", async function() {
+        it("returns undefined if batch not added", async function () {
             assert.isUndefined(await storage.current());
         });
 
-        it("returns last added batch", async function() {
+        it("returns last added batch", async function () {
             await storage.add(batches[0], l1Txn);
             await storage.add(batches[1], l1Txn);
 
@@ -113,17 +113,17 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("previous", () => {
-        it("returns undefined if batch not added", async function() {
+        it("returns undefined if batch not added", async function () {
             assert.isUndefined(await storage.previous());
         });
 
-        it("returns undefined if one batch added", async function() {
+        it("returns undefined if one batch added", async function () {
             await storage.add(batches[0], l1Txn);
 
             assert.isUndefined(await storage.previous());
         });
 
-        it("returns correct previous batch", async function() {
+        it("returns correct previous batch", async function () {
             await storage.add(batches[0], l1Txn);
             await storage.add(batches[1], l1Txn);
 
@@ -132,13 +132,13 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("rollbackTo", () => {
-        it("fails if batch not found", async function() {
+        it("fails if batch not found", async function () {
             await assert.isRejected(
                 storage.rollbackTo(batches[0].commitmentRoot)
             );
         });
 
-        it("returns empty array if commitmentRoot is latest batch", async function() {
+        it("returns empty array if commitmentRoot is latest batch", async function () {
             await storage.add(batches[0], l1Txn);
 
             assert.lengthOf(
@@ -147,7 +147,7 @@ describe("BatchMemoryStorage", () => {
             );
         });
 
-        it("rolls back and returns removed batches", async function() {
+        it("rolls back and returns removed batches", async function () {
             for (const b of batches) {
                 await storage.add(b, l1Txn);
             }
@@ -171,11 +171,11 @@ describe("BatchMemoryStorage", () => {
     });
 
     describe("getL1Transaction", () => {
-        it("returns undefined if no batch added", async function() {
+        it("returns undefined if no batch added", async function () {
             assert.isUndefined(await storage.getL1Transaction("abc123"));
         });
 
-        it("returns correct L1 transaction metadata", async function() {
+        it("returns correct L1 transaction metadata", async function () {
             const anotherL1Txn = { hash: "0x456789 " };
 
             await storage.add(batches[0], l1Txn);

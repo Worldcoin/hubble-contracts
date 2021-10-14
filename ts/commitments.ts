@@ -45,7 +45,7 @@ abstract class Commitment {
     public toCompressedStruct(): CompressedStruct {
         return {
             stateRoot: this.stateRoot,
-            bodyRoot: this.bodyRoot
+            bodyRoot: this.bodyRoot,
         };
     }
 }
@@ -106,8 +106,8 @@ export class TransferCommitment extends Commitment {
                 accountRoot: this.accountRoot,
                 signature: this.signature,
                 feeReceiver: this.feeReceiver,
-                txs: this.txs
-            }
+                txs: this.txs,
+            },
         };
     }
     public toBatch() {
@@ -165,7 +165,7 @@ export class MassMigrationCommitment extends Commitment {
             txs[0].spokeID,
             migrationTree.root,
             states[0].tokenID,
-            sum(txs.map(tx => tx.amount)),
+            sum(txs.map((tx) => tx.amount)),
             feeReceiver,
             serialize(txs)
         );
@@ -195,7 +195,7 @@ export class MassMigrationCommitment extends Commitment {
                 "uint256",
                 "uint256",
                 "uint256",
-                "bytes"
+                "bytes",
             ],
             [
                 this.accountRoot,
@@ -205,7 +205,7 @@ export class MassMigrationCommitment extends Commitment {
                 this.tokenID,
                 this.amount,
                 this.feeReceiver,
-                this.txs
+                this.txs,
             ]
         );
     }
@@ -220,8 +220,8 @@ export class MassMigrationCommitment extends Commitment {
                 tokenID: this.tokenID,
                 amount: this.amount,
                 feeReceiver: this.feeReceiver,
-                txs: this.txs
-            }
+                txs: this.txs,
+            },
         };
     }
     public toBatch() {
@@ -238,7 +238,7 @@ export class Create2TransferCommitment extends TransferCommitment {
 export class Batch {
     private tree: Tree;
     constructor(public readonly commitments: Commitment[]) {
-        this.tree = Tree.merklize(commitments.map(c => c.hash()));
+        this.tree = Tree.merklize(commitments.map((c) => c.hash()));
     }
 
     get commitmentRoot(): string {
@@ -253,14 +253,14 @@ export class Batch {
         return {
             commitment: this.commitments[leafIndex].toSolStruct(),
             path: leafIndex,
-            witness: this.witness(leafIndex)
+            witness: this.witness(leafIndex),
         };
     }
     proofCompressed(leafIndex: number): CommitmentInclusionProof {
         return {
             commitment: this.commitments[leafIndex].toCompressedStruct(),
             path: leafIndex,
-            witness: this.witness(leafIndex)
+            witness: this.witness(leafIndex),
         };
     }
 }
@@ -290,12 +290,8 @@ export class TransferBatch extends Batch {
         txDescription: TransactionDescription,
         accountRoot: string
     ) {
-        const {
-            stateRoots,
-            signatures,
-            feeReceivers,
-            txss
-        } = txDescription.args;
+        const { stateRoots, signatures, feeReceivers, txss } =
+            txDescription.args;
         const commitments: TransferCommitment[] = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const commitment = new TransferCommitment(
@@ -312,10 +308,10 @@ export class TransferBatch extends Batch {
 
     async submit(rollup: Rollup, stakingAmount: Wei) {
         return await rollup.submitTransfer(
-            this.commitments.map(c => c.stateRoot),
-            this.commitments.map(c => c.signature),
-            this.commitments.map(c => c.feeReceiver),
-            this.commitments.map(c => c.txs),
+            this.commitments.map((c) => c.stateRoot),
+            this.commitments.map((c) => c.signature),
+            this.commitments.map((c) => c.feeReceiver),
+            this.commitments.map((c) => c.txs),
             { value: stakingAmount }
         );
     }
@@ -330,13 +326,8 @@ export class MassMigrationBatch extends Batch {
         txDescription: TransactionDescription,
         accountRoot: string
     ) {
-        const {
-            stateRoots,
-            signatures,
-            meta,
-            withdrawRoots,
-            txss
-        } = txDescription.args;
+        const { stateRoots, signatures, meta, withdrawRoots, txss } =
+            txDescription.args;
         const commitments: MassMigrationCommitment[] = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const [spokeID, tokenID, amount, feeReceiver] = meta[i];
@@ -358,16 +349,16 @@ export class MassMigrationBatch extends Batch {
 
     async submit(rollup: Rollup, stakingAmount: Wei) {
         return await rollup.submitMassMigration(
-            this.commitments.map(c => c.stateRoot),
-            this.commitments.map(c => c.signature),
-            this.commitments.map(c => [
+            this.commitments.map((c) => c.stateRoot),
+            this.commitments.map((c) => c.signature),
+            this.commitments.map((c) => [
                 c.spokeID,
                 c.tokenID,
                 c.amount,
-                c.feeReceiver
+                c.feeReceiver,
             ]),
-            this.commitments.map(c => c.withdrawRoot),
-            this.commitments.map(c => c.txs),
+            this.commitments.map((c) => c.withdrawRoot),
+            this.commitments.map((c) => c.txs),
             { value: stakingAmount }
         );
     }
@@ -382,12 +373,8 @@ export class Create2TransferBatch extends Batch {
         txDescription: TransactionDescription,
         accountRoot: string
     ) {
-        const {
-            stateRoots,
-            signatures,
-            feeReceivers,
-            txss
-        } = txDescription.args;
+        const { stateRoots, signatures, feeReceivers, txss } =
+            txDescription.args;
         const commitments: Create2TransferCommitment[] = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const commitment = new Create2TransferCommitment(
@@ -404,10 +391,10 @@ export class Create2TransferBatch extends Batch {
 
     async submit(rollup: Rollup, stakingAmount: Wei) {
         return await rollup.submitCreate2Transfer(
-            this.commitments.map(c => c.stateRoot),
-            this.commitments.map(c => c.signature),
-            this.commitments.map(c => c.feeReceiver),
-            this.commitments.map(c => c.txs),
+            this.commitments.map((c) => c.stateRoot),
+            this.commitments.map((c) => c.signature),
+            this.commitments.map((c) => c.feeReceiver),
+            this.commitments.map((c) => c.txs),
             { value: stakingAmount }
         );
     }

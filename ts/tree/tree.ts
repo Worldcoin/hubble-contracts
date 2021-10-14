@@ -6,7 +6,7 @@ import {
     ExceedTreeSize,
     MismatchHash,
     MismatchLength,
-    NegativeIndex
+    NegativeIndex,
 } from "../exceptions";
 import { Hasher, Node } from "./hasher";
 
@@ -210,7 +210,7 @@ export class Tree {
         index = index & ~1;
         return {
             l: this.getNode(level, index),
-            r: this.getNode(level, index + 1)
+            r: this.getNode(level, index + 1),
         };
     }
 }

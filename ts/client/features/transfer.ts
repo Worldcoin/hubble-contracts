@@ -3,7 +3,7 @@ import {
     BigNumberish,
     BytesLike,
     ContractTransaction,
-    Event
+    Event,
 } from "ethers";
 import {
     arrayify,
@@ -12,7 +12,7 @@ import {
     hexZeroPad,
     keccak256,
     solidityKeccak256,
-    solidityPack
+    solidityPack,
 } from "ethers/lib/utils";
 import { Rollup } from "../../../types/ethers-contracts/Rollup";
 import { aggregate, BlsVerifier, SignatureInterface } from "../../blsSigner";
@@ -25,7 +25,7 @@ import {
     processReceiver,
     processSender,
     validateReceiver,
-    validateSender
+    validateSender,
 } from "../stateTransitions";
 import { StateStorageEngine, StorageManager } from "../storageEngine";
 import { SameTokenPool } from "../txPool";
@@ -39,7 +39,7 @@ import {
     BatchHandlingStrategy,
     BatchPackingCommand,
     FailedOffchainTxWrapper,
-    Batch
+    Batch,
 } from "./interface";
 
 export class TransferCompressedTx implements CompressedTx {
@@ -48,7 +48,7 @@ export class TransferCompressedTx implements CompressedTx {
         StateIDLen,
         StateIDLen,
         FloatLength,
-        FloatLength
+        FloatLength,
     ];
     constructor(
         public readonly fromIndex: number,
@@ -62,7 +62,7 @@ export class TransferCompressedTx implements CompressedTx {
             hexZeroPad(hexlify(this.fromIndex), StateIDLen),
             hexZeroPad(hexlify(this.toIndex), StateIDLen),
             float16.compress(this.amount),
-            float16.compress(this.fee)
+            float16.compress(this.fee),
         ]);
         return hexlify(concated);
     }
@@ -91,7 +91,7 @@ export class TransferCompressedTx implements CompressedTx {
                 this.toIndex,
                 nonce,
                 this.amount,
-                this.fee
+                this.fee,
             ]
         );
     }
@@ -100,8 +100,10 @@ export class TransferCompressedTx implements CompressedTx {
         return `<TransferCompressed  ${this.fromIndex}->${this.toIndex} $${this.amount}  fee ${this.fee}>`;
     }
 }
-export class TransferOffchainTx extends TransferCompressedTx
-    implements OffchainTx {
+export class TransferOffchainTx
+    extends TransferCompressedTx
+    implements OffchainTx
+{
     public static fromCompressed(
         compTx: TransferCompressedTx,
         nonce: number
@@ -147,7 +149,7 @@ export class TransferOffchainTx extends TransferCompressedTx
             float16.compress(this.amount),
             float16.compress(this.fee),
             hexZeroPad(hexlify(this.nonce), StateIDLen),
-            dumpG1(this.signature?.sol)
+            dumpG1(this.signature?.sol),
         ]);
         return hexlify(concated);
     }
@@ -162,27 +164,27 @@ export class TransferOffchainTx extends TransferCompressedTx
             {
                 name: "fromIndex",
                 length: StateIDLen,
-                constructor: BigNumber.from
+                constructor: BigNumber.from,
             },
             {
                 name: "toIndex",
                 length: StateIDLen,
-                constructor: BigNumber.from
+                constructor: BigNumber.from,
             },
             {
                 name: "amount",
                 length: FloatLength,
-                constructor: decompress
+                constructor: decompress,
             },
             {
                 name: "fee",
                 length: FloatLength,
-                constructor: decompress
+                constructor: decompress,
             },
             { name: "nonce", length: StateIDLen, constructor: BigNumber.from },
-            { name: "signature", length: 64, constructor: hexlify }
+            { name: "signature", length: 64, constructor: hexlify },
         ];
-        const sum = sumNumber(fields.map(x => x.length));
+        const sum = sumNumber(fields.map((x) => x.length));
         if (bytes.length != sum) throw new Error("invalid bytes");
         const obj: any = {};
         let position = 0;
@@ -225,7 +227,7 @@ export function getAggregateSig(txs: OffchainTx[]): solG1 {
 }
 
 export function compress(txs: OffchainTx[]): string {
-    return hexlify(concat(txs.map(tx => tx.toCompressed().serialize())));
+    return hexlify(concat(txs.map((tx) => tx.toCompressed().serialize())));
 }
 
 export class TransferCommitment extends BaseCommitment {
@@ -263,8 +265,8 @@ export class TransferCommitment extends BaseCommitment {
                 accountRoot: this.accountRoot,
                 signature: this.signature,
                 feeReceiver: this.feeReceiver,
-                txs: this.txs
-            }
+                txs: this.txs,
+            },
         };
     }
     public decompressTxs(): TransferCompressedTx[] {
@@ -336,7 +338,7 @@ async function process(
         offchainTxs.push(offchainTx);
         await processTransfer(tx, tokenID, engine);
     }
-    const fees = sum(txs.map(tx => tx.fee));
+    const fees = sum(txs.map((tx) => tx.fee));
     await processReceiver(feeReceiverID, fees, tokenID, engine);
     await engine.commit();
     if (engine.root != commitment.stateRoot)
@@ -382,7 +384,7 @@ async function pack(
         acceptedTxs.push(tx);
     }
     if (acceptedTxs.length == 0) throw new Error("No tx has been accepted");
-    const fees = sum(acceptedTxs.map(tx => tx.fee));
+    const fees = sum(acceptedTxs.map((tx) => tx.fee));
     await processReceiver(pipe.feeReceiverID, fees, pipe.tokenID, engine);
     await engine.commit();
 
@@ -435,12 +437,8 @@ export class TransferHandlingStrategy implements BatchHandlingStrategy {
         const data = ethTx?.data as string;
         const accountRoot = event.args?.accountRoot;
         const txDescription = this.rollup.interface.parseTransaction({ data });
-        const {
-            stateRoots,
-            signatures,
-            feeReceivers,
-            txss
-        } = txDescription.args;
+        const { stateRoots, signatures, feeReceivers, txss } =
+            txDescription.args;
         const commitments = [];
         for (let i = 0; i < stateRoots.length; i++) {
             const commitment = new TransferCommitment(
@@ -506,7 +504,7 @@ export class TransferPool implements ITransferPool {
         return {
             source,
             tokenID: this.tokenID,
-            feeReceiverID: this.feeReceiverID
+            feeReceiverID: this.feeReceiverID,
         };
     }
     toString() {
@@ -514,8 +512,10 @@ export class TransferPool implements ITransferPool {
     }
 }
 
-export class SimulatorPool extends OffchainTransferFactory
-    implements ITransferPool {
+export class SimulatorPool
+    extends OffchainTransferFactory
+    implements ITransferPool
+{
     private tokenID?: number;
     private feeReceiverID?: number;
     async setTokenID() {
@@ -541,7 +541,7 @@ export class SimulatorPool extends OffchainTransferFactory
         return {
             source,
             tokenID: this.tokenID,
-            feeReceiverID: this.feeReceiverID
+            feeReceiverID: this.feeReceiverID,
         };
     }
 }
@@ -557,7 +557,7 @@ async function packBatch(
     const commitments = [];
     const txBundle: TransactionBundle = {
         acceptedTxs: [],
-        failedTxs: []
+        failedTxs: [],
     };
     for (let i = 0; i < MAX_COMMIT_PER_BATCH; i++) {
         const pipe = pool.getNextPipe();
@@ -587,10 +587,10 @@ async function submitTransfer(
     stakingAmount: BigNumberish
 ) {
     return await rollup.submitTransfer(
-        batch.commitments.map(c => c.stateRoot),
-        batch.commitments.map(c => c.signature),
-        batch.commitments.map(c => c.feeReceiver),
-        batch.commitments.map(c => c.txs),
+        batch.commitments.map((c) => c.stateRoot),
+        batch.commitments.map((c) => c.signature),
+        batch.commitments.map((c) => c.feeReceiver),
+        batch.commitments.map((c) => c.txs),
         { value: stakingAmount }
     );
 }
@@ -631,7 +631,7 @@ export class TransferPackingCommand implements BatchPackingCommand {
                 l1TxnHash: tx.hash,
                 // TODO Figure out how to get finalization state in this scope.
                 // https://github.com/thehubbleproject/hubble-contracts/issues/592
-                l1BlockIncluded: -1
+                l1BlockIncluded: -1,
             });
         }
         for (const failedTx of failedTxs) {

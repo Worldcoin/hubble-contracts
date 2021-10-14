@@ -6,13 +6,13 @@ import { Genesis } from "../../ts/genesis";
 import { Hubble } from "../../ts/hubble";
 import * as mcl from "../../ts/mcl";
 
-describe("hubble", function() {
-    it("Runs hubble", async function() {
+describe("hubble", function () {
+    it("Runs hubble", async function () {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         const parameters = {
             ...TESTING_PARAMS,
-            GENESIS_STATE_ROOT: ZERO_BYTES32
+            GENESIS_STATE_ROOT: ZERO_BYTES32,
         };
         const contracts = await deployAll(signer, parameters);
         let addresses: { [key: string]: string } = {};

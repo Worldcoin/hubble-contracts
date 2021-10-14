@@ -11,14 +11,14 @@ export const SALT = {
         utils.toUtf8Bytes(
             "HUBBLE_DEPLOYMENT_SALT" + ":" + "PAIRING_GAS_ESTIMATOR"
         )
-    )
+    ),
 };
 
 export const KEYLESS_DEPLOYMENT = {
     // Caution:
     // Gas price in mainnet is wildly volatile
     GAS_PRICE: BigNumber.from(10e10),
-    GAS_LIMIT: BigNumber.from(383544)
+    GAS_LIMIT: BigNumber.from(383544),
 };
 
 export const DEPLOYER_ADDRESS = "0xD06b90B066e0041f4dD471C6DA85099742a9C98E";
@@ -39,7 +39,7 @@ export function calculateAddresses(): StaticAdresses {
     const addresses = {
         deployer: deployer.contractAddress,
         keyless: deployer.keylessAccount,
-        bnPairingCostEstimator
+        bnPairingCostEstimator,
     };
     return addresses;
 }

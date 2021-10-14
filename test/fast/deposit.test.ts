@@ -14,16 +14,16 @@ import { TransferCommitment } from "../../ts/commitments";
 import { StateTree } from "../../ts/stateTree";
 import { ERC20ValueFactory } from "../../ts/decimal";
 
-describe("Deposit Core", async function() {
+describe("Deposit Core", async function () {
     let contract: TestDepositCore;
     const maxSubtreeDepth = 4;
-    before(async function() {
+    before(async function () {
         const [signer] = await ethers.getSigners();
         contract = await new TestDepositCoreFactory(signer).deploy(
             maxSubtreeDepth
         );
     });
-    it("insert and merge many deposits", async function() {
+    it("insert and merge many deposits", async function () {
         for (let j = 0; j < 5; j++) {
             const maxSubtreeSize = 2 ** maxSubtreeDepth;
             const leaves = randomLeaves(maxSubtreeSize);
@@ -66,15 +66,15 @@ describe("Deposit Core", async function() {
     });
 });
 
-describe("DepositManager", async function() {
+describe("DepositManager", async function () {
     let contracts: allContracts;
     let tokenID: number;
     let erc20: ERC20ValueFactory;
-    beforeEach(async function() {
+    beforeEach(async function () {
         const [signer] = await ethers.getSigners();
         contracts = await deployAll(signer, {
             ...TESTING_PARAMS,
-            GENESIS_STATE_ROOT: constants.HashZero
+            GENESIS_STATE_ROOT: constants.HashZero,
         });
         const { exampleToken, tokenRegistry, depositManager } = contracts;
         tokenID = (await tokenRegistry.nextTokenID()).toNumber() - 1;
@@ -85,7 +85,7 @@ describe("DepositManager", async function() {
             LARGE_AMOUNT_OF_TOKEN
         );
     });
-    it("should allow depositing 2 leaves in a subtree and merging it", async function() {
+    it("should allow depositing 2 leaves in a subtree and merging it", async function () {
         const { depositManager } = contracts;
         const amount = erc20.fromHumanValue("10");
         const deposit0 = State.new(0, tokenID, amount.l2Value, 0);
@@ -138,7 +138,7 @@ describe("DepositManager", async function() {
         assert.equal(subtreeRoot, pendingDeposit);
     });
 
-    it("submit a deposit Batch to rollup", async function() {
+    it("submit a deposit Batch to rollup", async function () {
         const { depositManager, rollup, blsAccountRegistry } = contracts;
 
         const stateTree = StateTree.new(TESTING_PARAMS.MAX_DEPTH);

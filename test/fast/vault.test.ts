@@ -13,7 +13,7 @@ describe("Vault", () => {
     let otherSigner: SignerWithAddress;
     let vault: Vault;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         const signers = await ethers.getSigners();
         owner = signers[0];
         otherSigner = signers[1];
@@ -23,14 +23,14 @@ describe("Vault", () => {
     });
 
     describe("setRollupAddress", () => {
-        it("fails if sender is not owner", async function() {
+        it("fails if sender is not owner", async function () {
             await assert.isRejected(
                 vault.connect(otherSigner).setRollupAddress(randomAddress()),
                 /.*Ownable: caller is not the owner/
             );
         });
 
-        it("sets rollup contract address and fails if called again", async function() {
+        it("sets rollup contract address and fails if called again", async function () {
             const rollupAddress = randomAddress();
             await vault.setRollupAddress(rollupAddress);
             assert.equal(await vault.rollup(), rollupAddress);

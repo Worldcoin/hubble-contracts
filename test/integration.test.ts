@@ -9,7 +9,7 @@ import {
     Group,
     txCreate2TransferFactory,
     txMassMigrationFactory,
-    txTransferFactory
+    txTransferFactory,
 } from "../ts/factory";
 import { DeploymentParameters } from "../ts/interfaces";
 import { MigrationTree, StateTree } from "../ts/stateTree";
@@ -23,7 +23,7 @@ import {
     MassMigrationBatch,
     MassMigrationCommitment,
     TransferBatch,
-    TransferCommitment
+    TransferCommitment,
 } from "../ts/commitments";
 import { getBatchID, hexToUint8Array, mineBlocks } from "../ts/utils";
 import { serialize } from "../ts/tx";
@@ -36,7 +36,7 @@ import { deployKeyless } from "../ts/deployment/deploy";
 // We are deploying a new token with tokenID 1
 const tokenID = 1;
 
-describe("Integration Test", function() {
+describe("Integration Test", function () {
     let contracts: allContracts;
     let stateTree: StateTree;
     let parameters: DeploymentParameters;
@@ -55,7 +55,7 @@ describe("Integration Test", function() {
     let migrationTrees: MigrationTree[] = [];
     let lastBiddedSlot: number = -100;
 
-    before(async function() {
+    before(async function () {
         this.timeout(100000);
         await mcl.init();
         [deployer, coordinator, withdrawer] = await ethers.getSigners();
@@ -66,7 +66,7 @@ describe("Integration Test", function() {
         genesisRoot = stateTree.root;
         contracts = await deployAll(deployer, {
             ...parameters,
-            GENESIS_STATE_ROOT: genesisRoot
+            GENESIS_STATE_ROOT: genesisRoot,
         });
         const { rollup, blsAccountRegistry } = contracts;
         domain = hexToUint8Array(await rollup.domainSeparator());
@@ -75,7 +75,7 @@ describe("Integration Test", function() {
             blsAccountRegistry.connect(coordinator)
         );
     });
-    beforeEach(async function() {
+    beforeEach(async function () {
         // Remember to bid when a new slot starts
         if (lastBiddedSlot > 0) {
             const { burnAuction } = contracts;
@@ -88,7 +88,7 @@ describe("Integration Test", function() {
             }
         }
     });
-    it("Register another token", async function() {
+    it("Register another token", async function () {
         const { tokenRegistry } = contracts;
         newToken = await new ExampleTokenFactory(coordinator).deploy();
         await tokenRegistry.requestRegistration(newToken.address);
@@ -100,7 +100,7 @@ describe("Integration Test", function() {
 
         assert.equal(event.args?.tokenID, tokenID);
     });
-    it("Coordinator bid the first auction", async function() {
+    it("Coordinator bid the first auction", async function () {
         const { burnAuction } = contracts;
         const genesisBlock = Number(await burnAuction.genesisBlock());
 
@@ -129,7 +129,7 @@ describe("Integration Test", function() {
         // Set currentSlot to a positive number, and we remember to bid in beforeEach
         lastBiddedSlot = 3;
     });
-    it("Deposit some users", async function() {
+    it("Deposit some users", async function () {
         const { depositManager, rollup } = contracts;
         const subtreeSize = 2 ** parameters.MAX_DEPOSIT_SUBTREE_DEPTH;
         const nSubtrees = 10;
@@ -139,7 +139,7 @@ describe("Integration Test", function() {
             n: nDeposits,
             initialStateID: 0,
             initialPubkeyID: 0,
-            domain
+            domain,
         }).connect(stateTree);
         const balance = CommonToken.fromHumanValue("1234.0");
         const fromBlockNumber = await deployer.provider?.getBlockNumber();
@@ -171,14 +171,14 @@ describe("Integration Test", function() {
             await rollup
                 .connect(coordinator)
                 .submitDeposits(previousProof, vacant, {
-                    value: parameters.STAKE_AMOUNT
+                    value: parameters.STAKE_AMOUNT,
                 });
             const batchID = await getBatchID(rollup);
             stakedBatchIDs.push(batchID);
             subgroup.createStates({
                 initialBalance: balance.l2Value,
                 tokenID,
-                zeroNonce: true
+                zeroNonce: true,
             });
             const depositBatch = new BodylessCommitment(
                 stateTree.root
@@ -188,7 +188,7 @@ describe("Integration Test", function() {
             previousProof = depositBatch.proofCompressed(0);
         }
     }).timeout(40000);
-    it("Users doing Transfers", async function() {
+    it("Users doing Transfers", async function () {
         console.log("Next state ID", nextStateID);
         const { rollup } = contracts;
         const numCommits = 32;
@@ -217,7 +217,7 @@ describe("Integration Test", function() {
         const batchID = await getBatchID(rollup);
         stakedBatchIDs.push(batchID);
     });
-    it("Getting new users via Create to transfer", async function() {
+    it("Getting new users via Create to transfer", async function () {
         const { rollup } = contracts;
         const numCommits = 32;
         const nNewUsers = parameters.MAX_TXS_PER_COMMIT * numCommits;
@@ -226,7 +226,7 @@ describe("Integration Test", function() {
             n: nNewUsers,
             initialStateID: nextStateID,
             initialPubkeyID: 0,
-            domain
+            domain,
         });
         const batchSize = accountRegistry.batchSize;
         // We happen to number of newUsers as a multiple of batchSize, so no need to handle single registration case
@@ -269,7 +269,7 @@ describe("Integration Test", function() {
         const batchID = await getBatchID(rollup);
         stakedBatchIDs.push(batchID);
     }).timeout(240000);
-    it("Exit via mass migration", async function() {
+    it("Exit via mass migration", async function () {
         const { rollup, withdrawManager } = contracts;
         // The spokeID of the withdrawManager preregistered in the deploy script
         const spokeID = 1;
@@ -285,16 +285,14 @@ describe("Integration Test", function() {
             const { txs, signature } = txMassMigrationFactory(group, spokeID);
             stateTree.processMassMigrationCommit(txs, feeReceiverID);
 
-            const {
-                commitment,
-                migrationTree
-            } = MassMigrationCommitment.fromStateProvider(
-                accountRegistry.root(),
-                txs,
-                signature,
-                feeReceiverID,
-                stateTree
-            );
+            const { commitment, migrationTree } =
+                MassMigrationCommitment.fromStateProvider(
+                    accountRegistry.root(),
+                    txs,
+                    signature,
+                    feeReceiverID,
+                    stateTree
+                );
             commits.push(commitment);
             migrationTrees.push(migrationTree);
         }
@@ -343,7 +341,7 @@ describe("Integration Test", function() {
             );
         }
     }).timeout(240000);
-    it("Coordinator withdrew their stake", async function() {
+    it("Coordinator withdrew their stake", async function () {
         const { rollup } = contracts;
         for (const batchID of stakedBatchIDs) {
             const preBalance = await coordinator.getBalance();
@@ -351,10 +349,7 @@ describe("Integration Test", function() {
             const txFee = (await tx.wait()).gasUsed.mul(tx.gasPrice);
             const postBalance = await coordinator.getBalance();
             assert.equal(
-                postBalance
-                    .sub(preBalance)
-                    .add(txFee)
-                    .toString(),
+                postBalance.sub(preBalance).add(txFee).toString(),
                 parameters.STAKE_AMOUNT.toString()
             );
         }

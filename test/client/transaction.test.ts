@@ -8,7 +8,7 @@ import { TransactionMemoryStorage } from "../../ts/client/storageEngine/transact
 import {
     StatusTransitionInvalid,
     TransactionAlreadyExists,
-    TransactionDoesNotExist
+    TransactionDoesNotExist,
 } from "../../ts/exceptions";
 
 chai.use(chaiAsPromised);
@@ -16,23 +16,23 @@ chai.use(chaiAsPromised);
 describe("TransactionMemoryStorage", () => {
     let storage: TransactionStorage;
 
-    beforeEach(function() {
+    beforeEach(function () {
         storage = new TransactionMemoryStorage();
     });
 
     describe("get", () => {
-        it("returns undefined is transaction has not been added", async function() {
+        it("returns undefined is transaction has not been added", async function () {
             assert.isUndefined(await storage.get("abc123"));
         });
 
-        it("returns the correct transaction", async function() {
+        it("returns the correct transaction", async function () {
             const fee = BigNumber.from(1);
             const txns = [
                 new TransferOffchainTx(0, 1, BigNumber.from(123), fee, 0),
-                new TransferOffchainTx(2, 3, BigNumber.from(456), fee, 0)
+                new TransferOffchainTx(2, 3, BigNumber.from(456), fee, 0),
             ];
 
-            await Promise.all(txns.map(async t => storage.pending(t)));
+            await Promise.all(txns.map(async (t) => storage.pending(t)));
 
             assert.equal(storage.count(), 2);
 
@@ -47,7 +47,7 @@ describe("TransactionMemoryStorage", () => {
 
     describe("transaction lifecycle", () => {
         describe("succeeds", () => {
-            it("properly transitions to finalized", async function() {
+            it("properly transitions to finalized", async function () {
                 const txn = new TransferOffchainTx(
                     4,
                     5,
@@ -64,7 +64,7 @@ describe("TransactionMemoryStorage", () => {
                 const meta = {
                     batchID: 789,
                     l1TxnHash: "def456",
-                    l1BlockIncluded: 101112
+                    l1BlockIncluded: 101112,
                 };
                 const submittedStatus = await storage.submitted(txnMsg, meta);
                 assert.equal(submittedStatus.transaction, txn);
@@ -87,7 +87,7 @@ describe("TransactionMemoryStorage", () => {
                 );
             });
 
-            it("properly transitions to failed state from pending", async function() {
+            it("properly transitions to failed state from pending", async function () {
                 const txn = new TransferOffchainTx(
                     10,
                     11,
@@ -107,7 +107,7 @@ describe("TransactionMemoryStorage", () => {
                 assert.equal(failedStatus.detail, detail);
             });
 
-            it("properly transitions to failed state from submitted", async function() {
+            it("properly transitions to failed state from submitted", async function () {
                 const txn = new TransferOffchainTx(
                     11,
                     12,
@@ -119,7 +119,7 @@ describe("TransactionMemoryStorage", () => {
                 const meta = {
                     batchID: 111,
                     l1TxnHash: "aaa111",
-                    l1BlockIncluded: 111111
+                    l1BlockIncluded: 111111,
                 };
                 await storage.submitted(txn.message(), meta);
 
@@ -135,7 +135,7 @@ describe("TransactionMemoryStorage", () => {
         });
 
         describe("fails", () => {
-            it("when already added", async function() {
+            it("when already added", async function () {
                 const txn = new TransferOffchainTx(
                     6,
                     7,
@@ -150,12 +150,12 @@ describe("TransactionMemoryStorage", () => {
                 );
             });
 
-            it("when not found", async function() {
+            it("when not found", async function () {
                 const missingMessage = "ghi789";
                 const meta = {
                     batchID: 321,
                     l1TxnHash: "zyx987",
-                    l1BlockIncluded: 131415
+                    l1BlockIncluded: 131415,
                 };
                 await assert.isRejected(
                     storage.submitted(missingMessage, meta),
@@ -171,7 +171,7 @@ describe("TransactionMemoryStorage", () => {
                 );
             });
 
-            it("when transitioning to an improper state", async function() {
+            it("when transitioning to an improper state", async function () {
                 const txn = new TransferOffchainTx(
                     9,
                     0,
@@ -190,7 +190,7 @@ describe("TransactionMemoryStorage", () => {
                 const meta = {
                     batchID: 654,
                     l1TxnHash: "xyz789",
-                    l1BlockIncluded: 161718
+                    l1BlockIncluded: 161718,
                 };
                 await storage.submitted(txnMsg, meta);
 
@@ -217,7 +217,7 @@ describe("TransactionMemoryStorage", () => {
     });
 
     describe("sync", () => {
-        it("fails if transaction already exists", async function() {
+        it("fails if transaction already exists", async function () {
             const txn = new TransferOffchainTx(
                 111,
                 112,
@@ -231,7 +231,7 @@ describe("TransactionMemoryStorage", () => {
                 finalized: false,
                 batchID: 765,
                 l1TxnHash: "abc980",
-                l1BlockIncluded: 11112222
+                l1BlockIncluded: 11112222,
             };
 
             await assert.isRejected(
@@ -240,7 +240,7 @@ describe("TransactionMemoryStorage", () => {
             );
         });
 
-        it("successfully syncs a submitted transaction", async function() {
+        it("successfully syncs a submitted transaction", async function () {
             const txn = new TransferOffchainTx(
                 111,
                 222,
@@ -251,12 +251,12 @@ describe("TransactionMemoryStorage", () => {
             const meta = {
                 batchID: 999,
                 l1TxnHash: "zzz999",
-                l1BlockIncluded: 999000
+                l1BlockIncluded: 999000,
             };
 
             const status = await storage.sync(txn, {
                 ...meta,
-                finalized: false
+                finalized: false,
             });
 
             assert.equal(status.transaction, txn);
@@ -266,7 +266,7 @@ describe("TransactionMemoryStorage", () => {
             assert.equal(status.l1BlockIncluded, meta.l1BlockIncluded);
         });
 
-        it("successfully syncs a finalized transaction", async function() {
+        it("successfully syncs a finalized transaction", async function () {
             const txn = new TransferOffchainTx(
                 111,
                 333,
@@ -277,12 +277,12 @@ describe("TransactionMemoryStorage", () => {
             const meta = {
                 batchID: 111,
                 l1TxnHash: "aaa111",
-                l1BlockIncluded: 111
+                l1BlockIncluded: 111,
             };
 
             const status = await storage.sync(txn, {
                 ...meta,
-                finalized: true
+                finalized: true,
             });
 
             assert.equal(status.transaction, txn);

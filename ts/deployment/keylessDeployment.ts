@@ -3,7 +3,7 @@ import {
     Transaction,
     UnsignedTransaction,
     serialize,
-    parse
+    parse,
 } from "@ethersproject/transactions";
 import { SignatureLike } from "@ethersproject/bytes";
 import { Provider, TransactionRequest } from "@ethersproject/providers";
@@ -16,7 +16,7 @@ const zero = BigNumber.from(0);
 const signature: SignatureLike = {
     v: 27,
     r: "0x0001abb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1e",
-    s: "0x0002abb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1e"
+    s: "0x0002abb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1eabb1e",
 };
 
 export class KeylessDeployer {
@@ -38,7 +38,7 @@ export class KeylessDeployer {
             gasPrice: this.gasPrice,
             value: zero,
             data: this.bytecode,
-            gasLimit: this.gasLimit
+            gasLimit: this.gasLimit,
         };
         this.rawDeploymentTx = serialize(this.unsignedTx, signature);
         this.deploymentTx = parse(this.rawDeploymentTx);
@@ -46,7 +46,7 @@ export class KeylessDeployer {
         this.keylessAccount = this.deploymentTx.from;
         this.contractAddress = ethers.utils.getContractAddress({
             from: this.keylessAccount,
-            nonce: 0
+            nonce: 0,
         });
     }
     connect(provider: Provider) {
@@ -72,7 +72,7 @@ export class KeylessDeployer {
         const ethAmtForDeployment = this.gasLimit.mul(this.gasPrice);
         return await feeder.sendTransaction({
             to: this.keylessAccount,
-            value: ethAmtForDeployment
+            value: ethAmtForDeployment,
         });
     }
     private async deploy() {

@@ -11,7 +11,7 @@ import {
     SenderNotExist,
     StateAlreadyExist,
     WrongTokenID,
-    ZeroAmount
+    ZeroAmount,
 } from "./exceptions";
 
 export interface StateProvider {
@@ -52,7 +52,7 @@ const PLACEHOLDER_PROOF_WITNESS = Array(STATE_WITNESS_LENGHT).fill(
 
 const PLACEHOLDER_SOL_STATE_PROOF: SolStateMerkleProof = {
     state: ZERO_STATE,
-    witness: PLACEHOLDER_PROOF_WITNESS
+    witness: PLACEHOLDER_PROOF_WITNESS,
 };
 
 function applySender(sender: State, decrement: BigNumber): State {
@@ -129,7 +129,7 @@ export class StateTree implements StateProvider {
 
         return {
             witness: witness.nodes,
-            pathAtDepth
+            pathAtDepth,
         };
     }
 
@@ -167,7 +167,7 @@ export class StateTree implements StateProvider {
         }
         const proof = this.processReceiver(
             feeReceiverID,
-            sum(txs.map(tx => tx.fee)),
+            sum(txs.map((tx) => tx.fee)),
             tokenID
         );
         yield proof;
@@ -204,7 +204,7 @@ export class StateTree implements StateProvider {
         }
         const proof = this.processReceiver(
             feeReceiverID,
-            sum(txs.map(tx => tx.fee)),
+            sum(txs.map((tx) => tx.fee)),
             tokenID
         );
         yield proof;
@@ -240,7 +240,7 @@ export class StateTree implements StateProvider {
         }
         const proof = this.processReceiver(
             feeReceiverID,
-            sum(txs.map(tx => tx.fee)),
+            sum(txs.map((tx) => tx.fee)),
             tokenID
         );
         yield proof;

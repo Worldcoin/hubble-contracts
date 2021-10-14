@@ -26,7 +26,7 @@ describe("Registry", async () => {
     let registry: BlsAccountRegistry;
     let treeLeft: Tree;
     let treeRight: Tree;
-    beforeEach(async function() {
+    beforeEach(async function () {
         await mcl.init();
         const accounts = await ethers.getSigners();
         const proofOfBurn = await new ProofOfBurnFactory(accounts[0]).deploy();
@@ -42,7 +42,7 @@ describe("Registry", async () => {
         hasher = treeLeft.hasher;
     });
 
-    it("register a public keys", async function() {
+    it("register a public keys", async function () {
         for (let i = 0; i < 33; i++) {
             const { pubkey } = mcl.newKeyPair();
             const { uncompressed, leaf } = pubkeyToLeaf(pubkey);
@@ -59,7 +59,7 @@ describe("Registry", async () => {
         const root = hasher.hash2(treeLeft.root, treeRight.root);
         assert.equal(root, await registry.root());
     });
-    it("batch update", async function() {
+    it("batch update", async function () {
         const batchSize = 2 ** BATCH_DEPTH;
         for (let k = 0; k < 4; k++) {
             let leafs = [];
@@ -87,7 +87,7 @@ describe("Registry", async () => {
             assert.equal(root, await registry.root());
         }
     });
-    it("exists", async function() {
+    it("exists", async function () {
         let leafs = [];
         let pubkeys = [];
         for (let i = 0; i < 16; i++) {

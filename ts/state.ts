@@ -13,15 +13,11 @@ export class State implements Hashable {
     }
 
     static fromEncoded(data: BytesLike): State {
-        const [
-            pubkeyID,
-            tokenID,
-            balance,
-            nonce
-        ] = ethers.utils.defaultAbiCoder.decode(
-            ["uint256", "uint256", "uint256", "uint256"],
-            data
-        );
+        const [pubkeyID, tokenID, balance, nonce] =
+            ethers.utils.defaultAbiCoder.decode(
+                ["uint256", "uint256", "uint256", "uint256"],
+                data
+            );
         return new this(
             pubkeyID.toNumber(),
             tokenID.toNumber(),
@@ -72,7 +68,7 @@ export class State implements Hashable {
             pubkeyID,
             tokenID,
             balance,
-            nonce
+            nonce,
         };
     }
     public toString(): string {

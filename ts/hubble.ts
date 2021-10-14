@@ -21,7 +21,7 @@ export class Hubble {
         const contracts = genesis.getContracts(signer);
         const group = Group.new({
             n: 32,
-            domain: arrayify(genesis.auxiliary.domain)
+            domain: arrayify(genesis.auxiliary.domain),
         });
         return new Hubble(genesis.parameters, contracts, signer, group);
     }
@@ -76,7 +76,7 @@ export class Hubble {
                 "0x" + pubkeyRaw.slice(64, 128),
                 "0x" + pubkeyRaw.slice(0, 64),
                 "0x" + pubkeyRaw.slice(192, 256),
-                "0x" + pubkeyRaw.slice(128, 192)
+                "0x" + pubkeyRaw.slice(128, 192),
             ];
             console.log("Registering", parsedPubkey);
             const accID = await registry.callStatic.register(parsedPubkey);
