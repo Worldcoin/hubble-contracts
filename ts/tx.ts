@@ -6,7 +6,7 @@ import {
     concat,
     hexlify,
     solidityPack,
-    solidityKeccak256
+    solidityKeccak256,
 } from "ethers/lib/utils";
 import { COMMIT_SIZE } from "./constants";
 import { aggregate, SignatureInterface } from "./blsSigner";
@@ -57,7 +57,7 @@ export interface OffchainCreate2Transfer {
 }
 
 export function serialize(txs: Tx[]): string {
-    return hexlify(concat(txs.map(tx => tx.encode())));
+    return hexlify(concat(txs.map((tx) => tx.encode())));
 }
 
 export function getAggregateSig(txs: SignableTx[]): solG1 {
@@ -106,7 +106,7 @@ export class TxTransfer implements SignableTx {
                 this.toIndex,
                 this.nonce,
                 this.amount,
-                this.fee
+                this.fee,
             ]
         );
     }
@@ -120,7 +120,7 @@ export class TxTransfer implements SignableTx {
                 this.toIndex,
                 this.amount,
                 this.fee,
-                this.nonce
+                this.nonce,
             ]
         );
     }
@@ -132,7 +132,7 @@ export class TxTransfer implements SignableTx {
             toIndex: this.toIndex,
             amount: this.amount,
             fee: this.fee,
-            nonce: this.nonce
+            nonce: this.nonce,
         };
     }
 
@@ -141,7 +141,7 @@ export class TxTransfer implements SignableTx {
             hexZeroPad(hexlify(this.fromIndex), stateIDLen),
             hexZeroPad(hexlify(this.toIndex), stateIDLen),
             float16.compress(this.amount),
-            float16.compress(this.fee)
+            float16.compress(this.fee),
         ]);
         return hexlify(concated);
     }
@@ -185,7 +185,7 @@ export class TxMassMigration implements SignableTx {
                 this.amount,
                 this.fee,
                 this.nonce,
-                this.spokeID
+                this.spokeID,
             ]
         );
     }
@@ -199,7 +199,7 @@ export class TxMassMigration implements SignableTx {
                 this.amount,
                 this.fee,
                 this.spokeID,
-                this.nonce
+                this.nonce,
             ]
         );
     }
@@ -211,7 +211,7 @@ export class TxMassMigration implements SignableTx {
             amount: this.amount,
             fee: this.fee,
             spokeID: this.spokeID,
-            nonce: this.nonce
+            nonce: this.nonce,
         };
     }
 
@@ -219,7 +219,7 @@ export class TxMassMigration implements SignableTx {
         const concated = concat([
             hexZeroPad(hexlify(this.fromIndex), stateIDLen),
             float16.compress(this.amount),
-            float16.compress(this.fee)
+            float16.compress(this.fee),
         ]);
         return hexlify(concated);
     }
@@ -276,7 +276,7 @@ export class TxCreate2Transfer implements SignableTx {
                 hashPubkey(this.toPubkey),
                 this.nonce,
                 this.amount,
-                this.fee
+                this.fee,
             ]
         );
     }
@@ -290,7 +290,7 @@ export class TxCreate2Transfer implements SignableTx {
                 "uint256",
                 "uint256",
                 "uint256",
-                "uint256"
+                "uint256",
             ],
             [
                 this.TX_TYPE,
@@ -299,7 +299,7 @@ export class TxCreate2Transfer implements SignableTx {
                 this.toPubkeyID,
                 this.amount,
                 this.fee,
-                this.nonce
+                this.nonce,
             ]
         );
     }
@@ -312,7 +312,7 @@ export class TxCreate2Transfer implements SignableTx {
             toPubkeyID: this.toPubkeyID,
             amount: this.amount,
             fee: this.fee,
-            nonce: this.nonce
+            nonce: this.nonce,
         };
     }
 
@@ -322,7 +322,7 @@ export class TxCreate2Transfer implements SignableTx {
             hexZeroPad(hexlify(this.toIndex), stateIDLen),
             hexZeroPad(hexlify(this.toPubkeyID), stateIDLen),
             float16.compress(this.amount),
-            float16.compress(this.fee)
+            float16.compress(this.fee),
         ]);
         return hexlify(concated);
     }

@@ -13,7 +13,7 @@ const REF_PER_PAIR_COST = BigNumber.from(34000); // Per-point price for an ellip
 
 describe("BnPairingPrecompileCostEstimator", async () => {
     let c: BnPairingPrecompileCostEstimator;
-    before(async function() {
+    before(async function () {
         const accounts = await ethers.getSigners();
         c = await new BnPairingPrecompileCostEstimatorFactory(
             accounts[0]
@@ -24,7 +24,7 @@ describe("BnPairingPrecompileCostEstimator", async () => {
         assert.isTrue(baseCost0.eq(0));
         assert.isTrue(perPairCost0.eq(0));
     });
-    it("estimate gas", async function() {
+    it("estimate gas", async function () {
         await c.run();
         const baseCost0 = await c.baseCost();
         const perPairCost0 = await c.perPairCost();
@@ -37,7 +37,7 @@ describe("BnPairingPrecompileCostEstimator", async () => {
         assert.isTrue(baseCost0.eq(baseCost1));
         assert.isTrue(perPairCost0.eq(perPairCost1));
     });
-    it("out of gas", async function() {
+    it("out of gas", async function () {
         await expectRevert(
             c.run({ gasLimit: REF_BASE_COST.add(REF_PER_PAIR_COST) }),
             ""

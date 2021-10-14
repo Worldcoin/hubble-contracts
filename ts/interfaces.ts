@@ -19,7 +19,7 @@ export enum Usage {
     Transfer,
     MassMigration,
     Create2Transfer,
-    Deposit
+    Deposit,
 }
 
 export interface Hashable {
@@ -36,5 +36,5 @@ export enum Result {
     MismatchedAmount,
     BadWithdrawRoot,
     BadCompression,
-    TooManyTx
+    TooManyTx,
 }

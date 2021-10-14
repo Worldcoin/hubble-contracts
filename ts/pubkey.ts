@@ -20,7 +20,7 @@ export class Pubkey implements Hashable {
 
     public toString(): string {
         const shortHexes = this.pubkey
-            .map(s => prettyHex(s.toString()))
+            .map((s) => prettyHex(s.toString()))
             .join(", ");
         return `<Pubkey  ${shortHexes}>`;
     }

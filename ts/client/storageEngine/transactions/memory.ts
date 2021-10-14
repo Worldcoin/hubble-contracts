@@ -1,7 +1,7 @@
 import {
     StatusTransitionInvalid,
     TransactionAlreadyExists,
-    TransactionDoesNotExist
+    TransactionDoesNotExist,
 } from "../../../exceptions";
 import { OffchainTx } from "../../features/interface";
 import { Status } from "./constants";
@@ -10,7 +10,7 @@ import {
     SyncMeta,
     TransactionStatus,
     TransactionStorage,
-    TransationMessageOrObject
+    TransationMessageOrObject,
 } from "./interfaces";
 
 /**
@@ -40,7 +40,7 @@ export class TransactionMemoryStorage implements TransactionStorage {
 
         const txnStatus = {
             status: Status.Pending,
-            transaction: txn
+            transaction: txn,
         };
         this.transactionMessageToStatus[txnMessage] = txnStatus;
         return txnStatus;
@@ -58,7 +58,7 @@ export class TransactionMemoryStorage implements TransactionStorage {
             status: Status.Submitted,
             batchID,
             l1TxnHash,
-            l1BlockIncluded
+            l1BlockIncluded,
         };
         this.transactionMessageToStatus[msg] = submittedTxnStatus;
         return submittedTxnStatus;
@@ -96,7 +96,7 @@ export class TransactionMemoryStorage implements TransactionStorage {
             status,
             batchID,
             l1TxnHash,
-            l1BlockIncluded
+            l1BlockIncluded,
         };
         this.transactionMessageToStatus[txnMessage] = txnStatus;
         return txnStatus;
@@ -149,7 +149,7 @@ export class TransactionMemoryStorage implements TransactionStorage {
         const newTxnStatus = {
             ...txnStatus,
             status: next,
-            detail
+            detail,
         };
         this.transactionMessageToStatus[message] = newTxnStatus;
         return newTxnStatus;

@@ -8,7 +8,7 @@ import {
     CommitmentInclusionProof,
     CompressedStruct,
     SolStruct,
-    XCommitmentInclusionProof
+    XCommitmentInclusionProof,
 } from "./interface";
 
 export abstract class BaseCommitment implements Commitment {
@@ -25,7 +25,7 @@ export abstract class BaseCommitment implements Commitment {
     public toCompressedStruct(): CompressedStruct {
         return {
             stateRoot: this.stateRoot,
-            bodyRoot: this.bodyRoot
+            bodyRoot: this.bodyRoot,
         };
     }
 }
@@ -34,7 +34,7 @@ export class ConcreteBatch<T extends Commitment> implements Batch {
     private tree: Tree;
     constructor(public readonly commitments: T[]) {
         if (commitments.length === 0) throw new Error("no commitment");
-        this.tree = Tree.merklize(commitments.map(c => c.hash()));
+        this.tree = Tree.merklize(commitments.map((c) => c.hash()));
     }
 
     get postStateRoot(): string {
@@ -54,14 +54,14 @@ export class ConcreteBatch<T extends Commitment> implements Batch {
         return {
             commitment: this.commitments[leafIndex].toSolStruct(),
             path: leafIndex,
-            witness: this.witness(leafIndex)
+            witness: this.witness(leafIndex),
         };
     }
     proofCompressed(leafIndex: number): CommitmentInclusionProof {
         return {
             commitment: this.commitments[leafIndex].toCompressedStruct(),
             path: leafIndex,
-            witness: this.witness(leafIndex)
+            witness: this.witness(leafIndex),
         };
     }
 

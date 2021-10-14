@@ -3,14 +3,14 @@ import {
     calculateAddresses,
     deployerBytecode,
     DEPLOYER_ADDRESS,
-    KEYLESS_DEPLOYMENT
+    KEYLESS_DEPLOYMENT,
 } from "../ts/deployment/static";
 import { deployKeyless } from "../ts/deployment/deploy";
 import { KeylessDeployer } from "../ts/deployment/keylessDeployment";
 
 const argv = require("minimist")(process.argv.slice(2), {
     string: ["url", "root"],
-    boolean: ["check", "deploy", "offline"]
+    boolean: ["check", "deploy", "offline"],
 });
 
 async function main() {

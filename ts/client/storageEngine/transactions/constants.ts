@@ -6,5 +6,5 @@ export enum Status {
     // Transaction was finalized on L1
     Finalized = "finalized",
     // Transaction failed for another reason
-    Failed = "failed"
+    Failed = "failed",
 }

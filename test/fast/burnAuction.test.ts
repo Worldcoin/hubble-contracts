@@ -23,7 +23,7 @@ const badBidInsufficienttMessage =
 const badForgeMessage = "Invalid proposer";
 const uninitializedAuctionMessage = "Auction has not been initialized";
 
-describe("BurnAuction", function() {
+describe("BurnAuction", function () {
     let burnAuction: TestBurnAuction;
     let rollup: MockRollup;
     let signer1: Signer;
@@ -105,7 +105,7 @@ describe("BurnAuction", function() {
             expect(slot).to.eql({
                 coordinator: await signer2.getAddress(),
                 amount: toWei(bidAmount),
-                initialized: true
+                initialized: true,
             });
         });
 
@@ -121,13 +121,13 @@ describe("BurnAuction", function() {
             expect(slot).to.eql({
                 coordinator: await signer2.getAddress(),
                 amount: toWei("4"),
-                initialized: true
+                initialized: true,
             });
             slot = await getAuction(3);
             expect(slot).to.eql({
                 coordinator: await signer1.getAddress(),
                 amount: toWei("1"),
-                initialized: true
+                initialized: true,
             });
         });
 
@@ -280,10 +280,7 @@ describe("BurnAuction", function() {
                 oldBidderPrevDeposit.add(prevBidAmountWei).toString()
             ).to.be.equal(oldBidderNextDeposit.toString());
             expect(
-                newBidderPrevDeposit
-                    .add(valueWei)
-                    .sub(bidAmountWei)
-                    .toString()
+                newBidderPrevDeposit.add(valueWei).sub(bidAmountWei).toString()
             ).to.be.equal(newBidderNextDeposit.toString());
         } else {
             expect(
@@ -323,12 +320,9 @@ describe("BurnAuction", function() {
         expect(oldDeposit.sub(amount).toString()).to.be.equal(
             newDeposit.toString()
         );
-        expect(
-            oldBalance
-                .sub(fee)
-                .add(amount)
-                .toString()
-        ).to.be.equal(newBalance.toString());
+        expect(oldBalance.sub(fee).add(amount).toString()).to.be.equal(
+            newBalance.toString()
+        );
     }
 
     async function withdrawFail(
@@ -400,7 +394,7 @@ describe("BurnAuction", function() {
         return {
             amount: auction.amount.toString(),
             initialized: auction.initialized,
-            coordinator: auction.coordinator
+            coordinator: auction.coordinator,
         };
     }
 
@@ -409,7 +403,7 @@ describe("BurnAuction", function() {
         const currentAucttion = await getAuction(currentAuctionSlot);
         return {
             slot: currentAuctionSlot,
-            ...currentAucttion
+            ...currentAucttion,
         };
     }
 });

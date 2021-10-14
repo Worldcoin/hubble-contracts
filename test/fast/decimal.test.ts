@@ -8,12 +8,7 @@ describe("Decimal", () => {
 
     it("Rounding values", () => {
         const losslessCases: number[] = [
-            0,
-            1,
-            10000,
-            12.13,
-            0.1234,
-            18690000000
+            0, 1, 10000, 12.13, 0.1234, 18690000000,
         ];
         for (const value of losslessCases) {
             const amount = USDT.fromHumanValue(value.toString());
@@ -29,7 +24,7 @@ describe("Decimal", () => {
             { input: 123.123, expect: 123.1 },
             { input: 186950000000, expect: 186900000000 },
             { input: 4096, expect: 4090 },
-            { input: 4095, expect: 4095 }
+            { input: 4095, expect: 4095 },
         ];
         for (const _case of lossyCases) {
             const value = USDT.fromHumanValue(_case.input.toString());

@@ -5,7 +5,7 @@ import {
     calculateAddress,
     deploy as deployProxy,
     isDeployed as isProxyDeployed,
-    DeploymentResult as ProxyDeploymentResult
+    DeploymentResult as ProxyDeploymentResult,
 } from "./deployer";
 import { BnPairingPrecompileCostEstimatorFactory } from "../../types/ethers-contracts";
 import { SALT } from "./static";

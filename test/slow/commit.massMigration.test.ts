@@ -6,7 +6,7 @@ import { hexToUint8Array, randHex } from "../../ts/utils";
 import {
     BlsAccountRegistryFactory,
     ProofOfBurnFactory,
-    TestMassMigrationFactory
+    TestMassMigrationFactory,
 } from "../../types/ethers-contracts";
 import * as mcl from "../../ts/mcl";
 import { TestMassMigration } from "../../types/ethers-contracts/TestMassMigration";
@@ -18,7 +18,7 @@ import { MassMigrationCommitment } from "../../ts/commitments";
 import {
     EMPTY_SIGNATURE,
     STATE_TREE_DEPTH,
-    COMMIT_SIZE
+    COMMIT_SIZE,
 } from "../../ts/constants";
 import { deployKeyless } from "../../ts/deployment/deploy";
 
@@ -32,7 +32,7 @@ describe("Rollup Mass Migration", () => {
     let stateTree: StateTree;
     let users: Group;
 
-    before(async function() {
+    before(async function () {
         this.timeout(100000);
         await mcl.init();
         const [signer] = await ethers.getSigners();
@@ -49,7 +49,7 @@ describe("Rollup Mass Migration", () => {
             await registry.register(user.pubkey);
         }
     });
-    beforeEach(async function() {
+    beforeEach(async function () {
         const [signer] = await ethers.getSigners();
         rollup = await new TestMassMigrationFactory(signer).deploy();
         stateTree = StateTree.new(STATE_TREE_DEPTH);
@@ -57,46 +57,44 @@ describe("Rollup Mass Migration", () => {
         users.createStates({ tokenID });
     });
 
-    it("checks signature", async function() {
+    it("checks signature", async function () {
         const { txs, signature, senders } = txMassMigrationFactory(
             users,
             spokeID
         );
-        const pubkeys = senders.map(sender => sender.pubkey);
-        const pubkeyWitnesses = senders.map(sender =>
+        const pubkeys = senders.map((sender) => sender.pubkey);
+        const pubkeyWitnesses = senders.map((sender) =>
             registry.witness(sender.pubkeyID)
         );
         stateTree.processMassMigrationCommit(txs, 0);
         const serialized = serialize(txs);
 
         // Need post stateWitnesses
-        const postProofs = txs.map(tx => stateTree.getState(tx.fromIndex));
+        const postProofs = txs.map((tx) => stateTree.getState(tx.fromIndex));
 
         const postStateRoot = stateTree.root;
         const accountRoot = registry.root();
 
         const proof = {
-            states: postProofs.map(proof => proof.state),
-            stateWitnesses: postProofs.map(proof => proof.witness),
+            states: postProofs.map((proof) => proof.state),
+            stateWitnesses: postProofs.map((proof) => proof.witness),
             pubkeys,
-            pubkeyWitnesses
+            pubkeyWitnesses,
         };
-        const {
-            0: gasCost,
-            1: result
-        } = await rollup.callStatic.testCheckSignature(
-            signature,
-            proof,
-            postStateRoot,
-            accountRoot,
-            DOMAIN,
-            spokeID,
-            serialized
-        );
+        const { 0: gasCost, 1: result } =
+            await rollup.callStatic.testCheckSignature(
+                signature,
+                proof,
+                postStateRoot,
+                accountRoot,
+                DOMAIN,
+                spokeID,
+                serialized
+            );
         assert.equal(result, Result.Ok, `Got ${Result[result]}`);
         console.log("operation gas cost:", gasCost.toString());
     }).timeout(400000);
-    it("checks signature: same sender", async function() {
+    it("checks signature: same sender", async function () {
         const smallGroup = users.slice(4);
         let manySameSenderGroup = smallGroup;
         for (let i = 0; i < 7; i++) {
@@ -106,42 +104,40 @@ describe("Rollup Mass Migration", () => {
             manySameSenderGroup,
             spokeID
         );
-        const pubkeys = senders.map(sender => sender.pubkey);
-        const pubkeyWitnesses = senders.map(sender =>
+        const pubkeys = senders.map((sender) => sender.pubkey);
+        const pubkeyWitnesses = senders.map((sender) =>
             registry.witness(sender.pubkeyID)
         );
         stateTree.processMassMigrationCommit(txs, 0);
         const serialized = serialize(txs);
 
         // Need post stateWitnesses
-        const postProofs = txs.map(tx => stateTree.getState(tx.fromIndex));
+        const postProofs = txs.map((tx) => stateTree.getState(tx.fromIndex));
 
         const postStateRoot = stateTree.root;
         const accountRoot = registry.root();
 
         const proof = {
-            states: postProofs.map(proof => proof.state),
-            stateWitnesses: postProofs.map(proof => proof.witness),
+            states: postProofs.map((proof) => proof.state),
+            stateWitnesses: postProofs.map((proof) => proof.witness),
             pubkeys,
-            pubkeyWitnesses
+            pubkeyWitnesses,
         };
-        const {
-            0: gasCost,
-            1: result
-        } = await rollup.callStatic.testCheckSignature(
-            signature,
-            proof,
-            postStateRoot,
-            accountRoot,
-            DOMAIN,
-            spokeID,
-            serialized
-        );
+        const { 0: gasCost, 1: result } =
+            await rollup.callStatic.testCheckSignature(
+                signature,
+                proof,
+                postStateRoot,
+                accountRoot,
+                DOMAIN,
+                spokeID,
+                serialized
+            );
         assert.equal(result, Result.Ok, `Got ${Result[result]}`);
         console.log("operation gas cost:", gasCost.toString());
     }).timeout(800000);
 
-    it("checks state transitions", async function() {
+    it("checks state transitions", async function () {
         const { txs } = txMassMigrationFactory(users, spokeID);
         const feeReceiver = 0;
 
@@ -162,7 +158,7 @@ describe("Rollup Mass Migration", () => {
         const {
             0: gasCost,
             1: postRoot,
-            2: result
+            2: result,
         } = await rollup.callStatic.testProcessMassMigrationCommit(
             preStateRoot,
             COMMIT_SIZE,

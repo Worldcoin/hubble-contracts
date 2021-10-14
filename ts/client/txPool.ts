@@ -34,6 +34,6 @@ export class SameTokenPool<Item extends OffchainTx> {
     }
     getValue(topN?: number) {
         const size = topN ?? this.queue.length;
-        return sum(this.queue.slice(-size).map(tx => tx.fee));
+        return sum(this.queue.slice(-size).map((tx) => tx.fee));
     }
 }

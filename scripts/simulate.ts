@@ -3,7 +3,7 @@ import { AbortController } from "abort-controller";
 import { sleep } from "../ts/utils";
 
 const argv = require("minimist")(process.argv.slice(2), {
-    boolean: ["proposer"]
+    boolean: ["proposer"],
 });
 
 async function main() {
@@ -19,7 +19,7 @@ async function main() {
     const node = await HubbleNode.init(nodeType);
     await node.start();
     abortController.signal.addEventListener("abort", () => node.close(), {
-        once: true
+        once: true,
     });
     while (!abortController.signal.aborted) {
         await sleep(1000);
@@ -28,7 +28,7 @@ async function main() {
 
 main()
     .then(() => process.exit(0))
-    .catch(error => {
+    .catch((error) => {
         console.error(error);
         process.exit(1);
     });

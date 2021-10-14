@@ -34,7 +34,7 @@ export class SinglePubkeyRegisteredEventSyncer extends ContractEventSyncer {
         await chunk(events, 10).reduce(async (prev, eventsChunk) => {
             await prev;
             await Promise.all(
-                eventsChunk.map(e => this.handleSinglePubkeyRegistered(e))
+                eventsChunk.map((e) => this.handleSinglePubkeyRegistered(e))
             );
             await this.commitUpdate();
         }, Promise.resolve());

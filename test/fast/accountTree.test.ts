@@ -13,7 +13,7 @@ describe("Account Tree", async () => {
     let treeLeft: Tree;
     let treeRight: Tree;
     let hasher: Hasher;
-    beforeEach(async function() {
+    beforeEach(async function () {
         const accounts = await ethers.getSigners();
         accountTree = await new TestAccountTreeFactory(accounts[0]).deploy();
         DEPTH = (await accountTree.DEPTH()).toNumber();
@@ -22,7 +22,7 @@ describe("Account Tree", async () => {
         treeLeft = Tree.new(DEPTH, hasher);
         treeRight = Tree.new(DEPTH, hasher);
     });
-    it("empty tree construction", async function() {
+    it("empty tree construction", async function () {
         for (let i = 0; i < DEPTH; i++) {
             const zi = await accountTree.zeros(i);
             const fstLeft = await accountTree.filledSubtreesLeft(i);
@@ -40,7 +40,7 @@ describe("Account Tree", async () => {
         const root = hasher.hash2(treeLeft.root, treeRight.root);
         assert.equal(root, await accountTree.root());
     });
-    it("update with single leaf", async function() {
+    it("update with single leaf", async function () {
         for (let i = 0; i < 33; i++) {
             const leaf = randHex(32);
             const leafIndexLeft = Number(await accountTree.leafIndexLeft());
@@ -52,7 +52,7 @@ describe("Account Tree", async () => {
             assert.equal(root, await accountTree.root());
         }
     });
-    it("batch update", async function() {
+    it("batch update", async function () {
         const batchSize = 2 ** BATCH_DEPTH;
         for (let k = 0; k < 4; k++) {
             const leafs = randomLeaves(batchSize);
@@ -65,7 +65,7 @@ describe("Account Tree", async () => {
             assert.equal(root, await accountTree.root());
         }
     }).timeout(50000);
-    it("witness for left side", async function() {
+    it("witness for left side", async function () {
         let leafs = randomLeaves(16);
         for (let i = 0; i < leafs.length; i++) {
             treeLeft.updateSingle(i, leafs[i]);
@@ -83,7 +83,7 @@ describe("Account Tree", async () => {
             assert.isTrue(result);
         }
     });
-    it("witness for right side", async function() {
+    it("witness for right side", async function () {
         const batchSize = 2 ** BATCH_DEPTH;
         const leafs = randomLeaves(batchSize);
         treeRight.updateBatch(0, leafs);
@@ -102,12 +102,12 @@ describe("Account Tree", async () => {
         }
     });
 
-    it("gas cost: update tree single", async function() {
+    it("gas cost: update tree single", async function () {
         const leaf = ethers.utils.randomBytes(32);
         const gasCost = await accountTree.callStatic.updateSingle(leaf);
         console.log(gasCost.toNumber());
     });
-    it("gas cost: update tree batch", async function() {
+    it("gas cost: update tree batch", async function () {
         const leafs = randomLeaves(2 ** BATCH_DEPTH);
         const gasCost = await accountTree.callStatic.updateBatch(leafs);
         console.log(gasCost.toNumber());

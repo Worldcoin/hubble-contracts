@@ -15,7 +15,7 @@ import {
     parseG1,
     parseG2,
     hashToPoint,
-    verifyRaw
+    verifyRaw,
 } from "./mcl";
 
 export interface SignatureInterface {
@@ -61,6 +61,6 @@ export class BlsSigner {
 export function aggregate(
     signatures: SignatureInterface[]
 ): SignatureInterface {
-    const aggregated = aggregateRaw(signatures.map(s => s.mcl));
+    const aggregated = aggregateRaw(signatures.map((s) => s.mcl));
     return { mcl: aggregated, sol: g1ToHex(aggregated) };
 }

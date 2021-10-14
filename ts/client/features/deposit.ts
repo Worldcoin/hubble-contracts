@@ -12,7 +12,7 @@ import { BaseCommitment, ConcreteBatch } from "./base";
 import {
     BatchHandlingStrategy,
     BatchPackingCommand,
-    OffchainTx
+    OffchainTx,
 } from "./interface";
 
 interface Subtree {
@@ -58,7 +58,7 @@ export class DepositPool {
 
     private pushSubtree() {
         const states = this.depositLeaves.slice();
-        const root = Tree.merklize(states.map(s => s.hash())).root;
+        const root = Tree.merklize(states.map((s) => s.hash())).root;
         this.depositLeaves = [];
         this.subtreeQueue.push({ states, root });
     }
@@ -94,9 +94,9 @@ export async function handleNewBatch(
     const ethTx = await event.getTransaction();
     const data = ethTx?.data as string;
     const receipt = await event.getTransactionReceipt();
-    const logs = receipt.logs.map(log => rollup.interface.parseLog(log));
+    const logs = receipt.logs.map((log) => rollup.interface.parseLog(log));
     const depositsFinalisedLog = logs.filter(
-        log => log.signature == "DepositsFinalised(uint256,bytes32,uint256)"
+        (log) => log.signature == "DepositsFinalised(uint256,bytes32,uint256)"
     )[0];
     const txDescription = rollup.interface.parseTransaction({ data });
     const depositSubtreeRoot = depositsFinalisedLog.args?.depositSubTreeRoot;
@@ -112,7 +112,7 @@ export async function handleNewBatch(
     const context: FinalizationContext = {
         subtreeID,
         depositSubtreeRoot,
-        pathToSubTree: pathAtDepthNum
+        pathToSubTree: pathAtDepthNum,
     };
     const commitment = new DepositCommitment(stateRoot, context);
     return new ConcreteBatch([commitment]);

@@ -5,24 +5,24 @@ module.exports = {
     networks: {
         hardhat: {
             chainId: 123,
-            throwOnCallFailures: false
-        }
+            throwOnCallFailures: false,
+        },
     },
     solidity: {
         version: "0.6.12",
         settings: {
             metadata: {
-                bytecodeHash: "none"
+                bytecodeHash: "none",
             },
             optimizer: {
                 enabled: true,
-                runs: 200
+                runs: 200,
             },
             outputSelection: {
                 "*": {
-                    "*": ["metadata"]
-                }
-            }
-        }
-    }
+                    "*": ["metadata"],
+                },
+            },
+        },
+    },
 };

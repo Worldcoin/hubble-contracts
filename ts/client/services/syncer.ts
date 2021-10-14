@@ -9,7 +9,7 @@ import { DepositQueuedEventSyncer } from "./events/depositQueued";
 
 export enum SyncMode {
     INITIAL_SYNCING,
-    REGULAR_SYNCING
+    REGULAR_SYNCING,
 }
 
 export class SyncerService {
@@ -25,7 +25,7 @@ export class SyncerService {
             new SinglePubkeyRegisteredEventSyncer(api),
             new BatchPubkeyRegisteredEventSyncer(api),
             new DepositQueuedEventSyncer(api),
-            new NewBatchEventSyncer(api)
+            new NewBatchEventSyncer(api),
         ]);
     }
 

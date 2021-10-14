@@ -9,7 +9,7 @@ import { allContracts } from "../../ts/allContractsInterfaces";
 import { assert } from "chai";
 import {
     Create2TransferCommitment,
-    getGenesisProof
+    getGenesisProof,
 } from "../../ts/commitments";
 import { USDT } from "../../ts/decimal";
 import { hexToUint8Array } from "../../ts/utils";
@@ -21,7 +21,7 @@ const DOMAIN = hexToUint8Array(
     "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 );
 
-describe("Rollup Create2Transfer", async function() {
+describe("Rollup Create2Transfer", async function () {
     const tokenID = 1;
     let contracts: allContracts;
     let stateTree: StateTree;
@@ -30,11 +30,11 @@ describe("Rollup Create2Transfer", async function() {
     let usersWithoutState: Group;
     let genesisRoot: string;
 
-    before(async function() {
+    before(async function () {
         await mcl.init();
     });
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         const [signer] = await ethers.getSigners();
 
         const nUsersWithStates = 32;
@@ -42,13 +42,13 @@ describe("Rollup Create2Transfer", async function() {
             n: nUsersWithStates,
             initialStateID: 0,
             initialPubkeyID: 0,
-            domain: DOMAIN
+            domain: DOMAIN,
         });
         usersWithoutState = Group.new({
             n: 32,
             initialStateID: nUsersWithStates,
             initialPubkeyID: nUsersWithStates,
-            domain: DOMAIN
+            domain: DOMAIN,
         });
         stateTree = new StateTree(TESTING_PARAMS.MAX_DEPTH);
 
@@ -62,7 +62,7 @@ describe("Rollup Create2Transfer", async function() {
         await deployKeyless(signer, false);
         contracts = await deployAll(signer, {
             ...TESTING_PARAMS,
-            GENESIS_STATE_ROOT: genesisRoot
+            GENESIS_STATE_ROOT: genesisRoot,
         });
 
         registry = await AccountRegistry.new(contracts.blsAccountRegistry);
@@ -77,7 +77,7 @@ describe("Rollup Create2Transfer", async function() {
         }
     });
 
-    it("submit a batch and dispute", async function() {
+    it("submit a batch and dispute", async function () {
         const feeReceiver = usersWithStates.getUser(0).stateID;
         const { rollup } = contracts;
 

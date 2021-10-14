@@ -15,7 +15,7 @@ import { Group, txMassMigrationFactory } from "../../ts/factory";
 import { deployKeyless } from "../../ts/deployment/deploy";
 import { handleNewBatch } from "../../ts/client/batchHandler";
 
-describe("Mass Migrations", async function() {
+describe("Mass Migrations", async function () {
     const tokenID = 0;
     let contracts: allContracts;
     let stateTree: StateTree;
@@ -24,11 +24,11 @@ describe("Mass Migrations", async function() {
     let users: Group;
     let genesisRoot: string;
     const spokeID = 0;
-    before(async function() {
+    before(async function () {
         await mcl.init();
     });
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         const [signer] = await ethers.getSigners();
         users = Group.new({ n: 32, initialStateID: 0, initialPubkeyID: 0 });
         stateTree = new StateTree(TESTING_PARAMS.MAX_DEPTH);
@@ -43,7 +43,7 @@ describe("Mass Migrations", async function() {
         await deployKeyless(signer, false);
         contracts = await deployAll(signer, {
             ...TESTING_PARAMS,
-            GENESIS_STATE_ROOT: genesisRoot
+            GENESIS_STATE_ROOT: genesisRoot,
         });
         const { rollup, blsAccountRegistry } = contracts;
         DOMAIN = hexToUint8Array(await rollup.domainSeparator());
@@ -56,7 +56,7 @@ describe("Mass Migrations", async function() {
         }
     });
 
-    it("submit a batch and dispute", async function() {
+    it("submit a batch and dispute", async function () {
         const { rollup, massMigration } = contracts;
         const feeReceiver = users.getUser(0).stateID;
         const { txs, signature } = txMassMigrationFactory(users, spokeID);
@@ -73,15 +73,13 @@ describe("Mass Migrations", async function() {
             feeReceiver,
             stateTree
         );
-        const {
-            0: processedStateRoot,
-            1: result
-        } = await massMigration.processMassMigrationCommit(
-            preStateRoot,
-            TESTING_PARAMS.MAX_TXS_PER_COMMIT,
-            commitment.toSolStruct().body,
-            proofs
-        );
+        const { 0: processedStateRoot, 1: result } =
+            await massMigration.processMassMigrationCommit(
+                preStateRoot,
+                TESTING_PARAMS.MAX_TXS_PER_COMMIT,
+                commitment.toSolStruct().body,
+                proofs
+            );
         assert.equal(Result[result], Result[Result.Ok]);
         assert.equal(
             processedStateRoot,
@@ -125,7 +123,7 @@ describe("Mass Migrations", async function() {
             "Good state transition should not rollback"
         );
     }).timeout(80000);
-    it("submit a batch, finalize, and withdraw", async function() {
+    it("submit a batch, finalize, and withdraw", async function () {
         const { rollup, withdrawManager, exampleToken, vault } = contracts;
         const feeReceiver = users.getUser(0).stateID;
         const alice = users.getUser(1);
@@ -139,16 +137,14 @@ describe("Mass Migrations", async function() {
         );
         stateTree.processMassMigrationCommit([tx], feeReceiver);
 
-        const {
-            commitment,
-            migrationTree
-        } = MassMigrationCommitment.fromStateProvider(
-            registry.root(),
-            [tx],
-            alice.sign(tx).sol,
-            feeReceiver,
-            stateTree
-        );
+        const { commitment, migrationTree } =
+            MassMigrationCommitment.fromStateProvider(
+                registry.root(),
+                [tx],
+                alice.sign(tx).sol,
+                feeReceiver,
+                stateTree
+            );
 
         const batch = commitment.toBatch();
         await batch.submit(rollup, TESTING_PARAMS.STAKE_AMOUNT);

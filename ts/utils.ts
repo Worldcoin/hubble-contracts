@@ -6,7 +6,7 @@ import {
     parseEther,
     BytesLike,
     solidityKeccak256,
-    getAddress
+    getAddress,
 } from "ethers/lib/utils";
 import { Wei } from "./interfaces";
 import { assert, expect } from "chai";
@@ -98,7 +98,7 @@ export async function expectRevert(
         () => {
             assert.fail(`Expect tx to fail with reason: ${revertReason}`);
         },
-        error => {
+        (error) => {
             expect(error.message).to.have.string(revertReason);
         }
     );
@@ -112,7 +112,7 @@ export async function expectCallRevert(
         () => {
             assert.fail(`Expect tx to fail with reason: ${revertReason}`);
         },
-        error => {
+        (error) => {
             if (revertReason === null) {
                 assert.isNull(error.reason);
             } else {
@@ -127,7 +127,7 @@ export async function getBatchID(rollup: Rollup): Promise<number> {
 }
 
 export async function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export function computeRoot(

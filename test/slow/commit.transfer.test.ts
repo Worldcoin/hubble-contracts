@@ -26,7 +26,7 @@ describe("Rollup Transfer Commitment", () => {
     let stateTree: StateTree;
     let users: Group;
 
-    before(async function() {
+    before(async function () {
         this.timeout(100000);
         await mcl.init();
         const [signer] = await ethers.getSigners();
@@ -44,7 +44,7 @@ describe("Rollup Transfer Commitment", () => {
         }
     });
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         const [signer, ...rest] = await ethers.getSigners();
         rollup = await new TestTransferFactory(signer).deploy();
         stateTree = StateTree.new(STATE_TREE_DEPTH);
@@ -52,13 +52,13 @@ describe("Rollup Transfer Commitment", () => {
         users.createStates({ tokenID });
     });
 
-    it("transfer commitment: signature check", async function() {
+    it("transfer commitment: signature check", async function () {
         const { txs, signature, senders } = txTransferFactory(
             users,
             COMMIT_SIZE
         );
-        const pubkeys = senders.map(sender => sender.pubkey);
-        const pubkeyWitnesses = senders.map(sender =>
+        const pubkeys = senders.map((sender) => sender.pubkey);
+        const pubkeyWitnesses = senders.map((sender) =>
             registry.witness(sender.pubkeyID)
         );
 
@@ -66,28 +66,26 @@ describe("Rollup Transfer Commitment", () => {
         const serialized = serialize(txs);
 
         // Need post stateWitnesses
-        const postProofs = txs.map(tx => stateTree.getState(tx.fromIndex));
+        const postProofs = txs.map((tx) => stateTree.getState(tx.fromIndex));
 
         const postStateRoot = stateTree.root;
         const accountRoot = registry.root();
 
         const proof = {
-            states: postProofs.map(proof => proof.state),
-            stateWitnesses: postProofs.map(proof => proof.witness),
+            states: postProofs.map((proof) => proof.state),
+            stateWitnesses: postProofs.map((proof) => proof.witness),
             pubkeys,
-            pubkeyWitnesses
+            pubkeyWitnesses,
         };
-        const {
-            0: gasCost,
-            1: result
-        } = await rollup.callStatic._checkSignature(
-            signature,
-            proof,
-            postStateRoot,
-            accountRoot,
-            DOMAIN,
-            serialized
-        );
+        const { 0: gasCost, 1: result } =
+            await rollup.callStatic._checkSignature(
+                signature,
+                proof,
+                postStateRoot,
+                accountRoot,
+                DOMAIN,
+                serialized
+            );
         assert.equal(result, Result.Ok, `Got ${Result[result]}`);
         console.log("operation gas cost:", gasCost.toString());
         const { 1: badSig } = await rollup.callStatic._checkSignature(
@@ -110,41 +108,39 @@ describe("Rollup Transfer Commitment", () => {
         const receipt = await tx.wait();
         console.log("transaction gas cost:", receipt.gasUsed?.toNumber());
     }).timeout(400000);
-    it("transfer commitment: signature check, with 2 more tx from same sender", async function() {
+    it("transfer commitment: signature check, with 2 more tx from same sender", async function () {
         const fewSenderGroup = users.slice(3);
         const { txs, signature, senders } = txTransferFactory(
             fewSenderGroup,
             COMMIT_SIZE
         );
-        const pubkeys = senders.map(sender => sender.pubkey);
-        const pubkeyWitnesses = senders.map(sender =>
+        const pubkeys = senders.map((sender) => sender.pubkey);
+        const pubkeyWitnesses = senders.map((sender) =>
             registry.witness(sender.pubkeyID)
         );
 
         stateTree.processTransferCommit(txs, 0);
 
-        const postProofs = txs.map(tx => stateTree.getState(tx.fromIndex));
+        const postProofs = txs.map((tx) => stateTree.getState(tx.fromIndex));
         const proof = {
-            states: postProofs.map(proof => proof.state),
-            stateWitnesses: postProofs.map(proof => proof.witness),
+            states: postProofs.map((proof) => proof.state),
+            stateWitnesses: postProofs.map((proof) => proof.witness),
             pubkeys,
-            pubkeyWitnesses
+            pubkeyWitnesses,
         };
-        const {
-            0: gasCost,
-            1: result
-        } = await rollup.callStatic._checkSignature(
-            signature,
-            proof,
-            stateTree.root,
-            registry.root(),
-            DOMAIN,
-            serialize(txs)
-        );
+        const { 0: gasCost, 1: result } =
+            await rollup.callStatic._checkSignature(
+                signature,
+                proof,
+                stateTree.root,
+                registry.root(),
+                DOMAIN,
+                serialize(txs)
+            );
         assert.equal(result, Result.Ok, `Got ${Result[result]}`);
         console.log("operation gas cost:", gasCost.toString());
     }).timeout(400000);
-    it("transfer commitment: processTx", async function() {
+    it("transfer commitment: processTx", async function () {
         const { txs } = txTransferFactory(users, COMMIT_SIZE);
         for (const tx of txs) {
             const preRoot = stateTree.root;
@@ -153,16 +149,14 @@ describe("Rollup Transfer Commitment", () => {
                 tokenID
             );
             const postRoot = stateTree.root;
-            const {
-                0: processedRoot,
-                1: result
-            } = await rollup.testProcessTransfer(
-                preRoot,
-                tx,
-                tokenID,
-                senderProof,
-                receiverProof
-            );
+            const { 0: processedRoot, 1: result } =
+                await rollup.testProcessTransfer(
+                    preRoot,
+                    tx,
+                    tokenID,
+                    senderProof,
+                    receiverProof
+                );
             assert.equal(result, Result.Ok, `Got ${Result[result]}`);
             assert.equal(
                 processedRoot,
@@ -171,7 +165,7 @@ describe("Rollup Transfer Commitment", () => {
             );
         }
     });
-    it("transfer commitment: processTransferCommit", async function() {
+    it("transfer commitment: processTransferCommit", async function () {
         const { txs } = txTransferFactory(users, COMMIT_SIZE);
         const feeReceiver = 0;
 
@@ -179,16 +173,14 @@ describe("Rollup Transfer Commitment", () => {
         const { proofs } = stateTree.processTransferCommit(txs, feeReceiver);
         const postStateRoot = stateTree.root;
 
-        const {
-            0: postRoot,
-            1: gasCost
-        } = await rollup.callStatic.testProcessTransferCommit(
-            preStateRoot,
-            COMMIT_SIZE,
-            feeReceiver,
-            serialize(txs),
-            proofs
-        );
+        const { 0: postRoot, 1: gasCost } =
+            await rollup.callStatic.testProcessTransferCommit(
+                preStateRoot,
+                COMMIT_SIZE,
+                feeReceiver,
+                serialize(txs),
+                proofs
+            );
         console.log("processTransferBatch gas cost", gasCost.toNumber());
         assert.equal(postRoot, postStateRoot, "Mismatch post state root");
     }).timeout(80000);

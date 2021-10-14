@@ -8,7 +8,7 @@ import { DepositCommitment } from "../../ts/client/features/deposit";
 import { GenesisCommitment } from "../../ts/client/features/genesis";
 import {
     SimulatorPool,
-    TransferPackingCommand
+    TransferPackingCommand,
 } from "../../ts/client/features/transfer";
 import { SyncerService } from "../../ts/client/services/syncer";
 import { PRODUCTION_PARAMS } from "../../ts/constants";
@@ -36,8 +36,8 @@ import { StateTree } from "../../ts/stateTree";
  * types run independantly on an initial data set
  * and reach a correct end state.
  */
-describe("Client Integration", function() {
-    it("run", async function() {
+describe("Client Integration", function () {
+    it("run", async function () {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         const provider = signer.provider as providers.Provider;
@@ -123,7 +123,7 @@ describe("Client Integration", function() {
                     parameters.MAX_DEPOSIT_SUBTREE_DEPTH
                 );
                 await contracts.rollup.submitDeposits(prevProof, vacant, {
-                    value: parameters.STAKE_AMOUNT
+                    value: parameters.STAKE_AMOUNT,
                 });
                 numDepositBatches++;
 
@@ -131,13 +131,13 @@ describe("Client Integration", function() {
                 curSubGroup.createStates({
                     initialBalance: initialBalance.l2Value,
                     tokenID,
-                    zeroNonce: true
+                    zeroNonce: true,
                 });
                 // This is required by DepositCommitment but is not used in generating proof
                 const context = {
                     subtreeID: -1,
                     depositSubtreeRoot: "fake",
-                    pathToSubTree: -1
+                    pathToSubTree: -1,
                 };
 
                 // Generate next deposit proof

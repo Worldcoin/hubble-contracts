@@ -4,7 +4,7 @@ import { KeylessDeployer } from "./keylessDeployment";
 import {
     deployerBytecode,
     DEPLOYER_ADDRESS,
-    KEYLESS_DEPLOYMENT
+    KEYLESS_DEPLOYMENT,
 } from "./static";
 import { logAddress, logDeployment } from "../../scripts/logger";
 

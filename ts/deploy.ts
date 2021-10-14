@@ -17,7 +17,7 @@ import {
     SpokeRegistryFactory,
     VaultFactory,
     WithdrawManagerFactory,
-    Create2TransferFactory
+    Create2TransferFactory,
 } from "../types/ethers-contracts";
 import { BurnAuctionFactory } from "../types/ethers-contracts/BurnAuctionFactory";
 import { ProofOfBurnFactory } from "../types/ethers-contracts/ProofOfBurnFactory";
@@ -165,7 +165,7 @@ export async function deployAll(
         vault,
         depositManager,
         rollup,
-        withdrawManager
+        withdrawManager,
     };
 }
 
@@ -178,7 +178,8 @@ export async function deployAndWriteGenesis(
     parameters: DeploymentParameters,
     genesisPath: string = "genesis.json"
 ) {
-    const genesisEth1Block = (await signer.provider?.getBlockNumber()) as number;
+    const genesisEth1Block =
+        (await signer.provider?.getBlockNumber()) as number;
     await deployKeyless(signer, true);
     const contracts = await deployAll(signer, parameters, true);
     const genesis = await Genesis.fromContracts(

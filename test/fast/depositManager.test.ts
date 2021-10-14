@@ -14,7 +14,7 @@ describe("DepositManager", () => {
     let otherSigner: SignerWithAddress;
     let depositManager: DepositManager;
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         const signers = await ethers.getSigners();
         owner = signers[0];
         otherSigner = signers[1];
@@ -28,7 +28,7 @@ describe("DepositManager", () => {
     });
 
     describe("setRollupAddress", () => {
-        it("fails if sender is not owner", async function() {
+        it("fails if sender is not owner", async function () {
             await assert.isRejected(
                 depositManager
                     .connect(otherSigner)
@@ -37,7 +37,7 @@ describe("DepositManager", () => {
             );
         });
 
-        it("sets rollup contract address and fails if called again", async function() {
+        it("sets rollup contract address and fails if called again", async function () {
             const rollupAddress = randomAddress();
             await depositManager.setRollupAddress(rollupAddress);
             assert.equal(await depositManager.rollup(), rollupAddress);

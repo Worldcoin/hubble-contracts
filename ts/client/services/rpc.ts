@@ -12,10 +12,10 @@ const tx = {
         body: {
             type: "object",
             properties: {
-                bytes: { type: "string" }
-            }
-        }
-    }
+                bytes: { type: "string" },
+            },
+        },
+    },
 };
 
 export class RPC {
@@ -36,7 +36,7 @@ export class RPC {
             fastify.get("/", helloHandler);
             fastify.get<{ Params: { stateID: number } }>(
                 "/user/state/:stateID",
-                async function(request) {
+                async function (request) {
                     const stateID = request.params.stateID;
                     const state = await l2Storage.state.get(stateID);
                     return state.toJSON();
@@ -45,7 +45,7 @@ export class RPC {
             fastify.post<{ Body: { bytes: string } }>(
                 "/tx",
                 tx,
-                async request => {
+                async (request) => {
                     const bytes = arrayify(request.body.bytes);
                     const transfer = TransferOffchainTx.deserialize(bytes);
                     console.log(transfer.toString());

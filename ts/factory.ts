@@ -3,7 +3,7 @@ import { BlsSigner } from "./blsSigner";
 import {
     StateMemoryEngine,
     PubkeyMemoryEngine,
-    StorageManager
+    StorageManager,
 } from "./client/storageEngine";
 import { BatchMemoryStorage } from "./client/storageEngine/batches/memory";
 import { TransactionMemoryStorage } from "./client/storageEngine/transactions/memory";
@@ -18,7 +18,7 @@ import {
     TxCreate2Transfer,
     TxMassMigration,
     SignableTx,
-    getAggregateSig
+    getAggregateSig,
 } from "./tx";
 
 export class User {
@@ -146,10 +146,10 @@ export class Group {
         return this.stateProvider.getState(user.stateID).state;
     }
     public getPubkeys() {
-        return this.users.map(user => user.pubkey);
+        return this.users.map((user) => user.pubkey);
     }
     public getPubkeyIDs() {
-        return this.users.map(user => user.pubkeyID);
+        return this.users.map((user) => user.pubkeyID);
     }
 
     public syncState(): State[] {
@@ -295,6 +295,6 @@ export async function storageManagerFactory(
         pubkey: new PubkeyMemoryEngine(pubkeyTreeDepth),
         state: new StateMemoryEngine(stateTreeDepth),
         batches: new BatchMemoryStorage(),
-        transactions: new TransactionMemoryStorage()
+        transactions: new TransactionMemoryStorage(),
     };
 }

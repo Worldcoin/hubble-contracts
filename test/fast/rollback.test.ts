@@ -5,12 +5,12 @@ import { DeploymentParameters } from "../../ts/interfaces";
 import { randHex } from "../../ts/utils";
 import {
     MockDepositManagerFactory,
-    TestRollupFactory
+    TestRollupFactory,
 } from "../../types/ethers-contracts";
 import { MockDepositManager } from "../../types/ethers-contracts/MockDepositManager";
 import { TestRollup } from "../../types/ethers-contracts/TestRollup";
 
-describe("Rollback", function() {
+describe("Rollback", function () {
     let rollup: TestRollup;
     let depositManager: MockDepositManager;
     const param = TESTING_PARAMS;
@@ -31,7 +31,7 @@ describe("Rollback", function() {
         for (let i = 0; i < numOfBatches; i++) {
             if (i % 2 == 0) {
                 await rollup.submitDeposits(randHex(32), {
-                    value: param.STAKE_AMOUNT
+                    value: param.STAKE_AMOUNT,
                 });
             } else {
                 await rollup.submitDummyBatch({ value: param.STAKE_AMOUNT });
@@ -39,14 +39,14 @@ describe("Rollback", function() {
         }
     }
 
-    beforeEach(async function() {
+    beforeEach(async function () {
         await setup(param);
     });
-    it("Test rollback exactly 1 batch", async function() {
+    it("Test rollback exactly 1 batch", async function () {
         assert.equal(await getTipBatchID(), numOfBatches - 1);
         // Set gasLimit manually since estimateGas gets one that can slash no batch.
         const tx = await rollup.testRollback(numOfBatches - 1, {
-            gasLimit: 1000000
+            gasLimit: 1000000,
         });
         const [status] = await rollup.queryFilter(
             rollup.filters.RollbackStatus(null, null, null),
@@ -59,7 +59,7 @@ describe("Rollback", function() {
         assert.equal(Number(status.args?.startID), numOfBatches - 1);
         assert.equal(Number(status.args?.nDeleted), 1);
     });
-    it("Test rollback exactly 0 batch", async function() {
+    it("Test rollback exactly 0 batch", async function () {
         // Resetup with a high minGasLeft to skip rollback loop
         const param2 = { ...TESTING_PARAMS, MIN_GAS_LEFT: 12000000 };
         await setup(param2);
@@ -75,7 +75,7 @@ describe("Rollback", function() {
         assert.equal(Number(status.args?.nDeleted), 0);
     });
 
-    it("Test a long rollback", async function() {
+    it("Test a long rollback", async function () {
         const nBatches = await getTipBatchID();
         const tx = await rollup.testRollback(1, { gasLimit: 9500000 });
 
@@ -92,7 +92,7 @@ describe("Rollback", function() {
         console.log(`Rolled back ${nBatches} batches with ${gasUsed} gas`);
         console.log("gas per batch rolled back", gasUsed / nBatches);
     });
-    it("Test keep rolling back", async function() {
+    it("Test keep rolling back", async function () {
         const tipBatchID = numOfBatches - 1;
         const badBatchID = tipBatchID - 20;
         const goodBatchID = badBatchID - 1;
@@ -115,12 +115,12 @@ describe("Rollback", function() {
         assert.equal(Number(await rollup.invalidBatchMarker()), 0);
         assert.equal(await getTipBatchID(), goodBatchID);
     });
-    it("Test rollback with deposits", async function() {
+    it("Test rollback with deposits", async function () {
         const badBatchID = await getTipBatchID();
         const [subtree1, subtree2, subtree3] = [
             randHex(32),
             randHex(32),
-            randHex(32)
+            randHex(32),
         ];
         await rollup.submitDeposits(subtree1, { value: param.STAKE_AMOUNT });
         await rollup.submitDummyBatch({ value: param.STAKE_AMOUNT });

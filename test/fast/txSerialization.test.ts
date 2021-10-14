@@ -4,7 +4,7 @@ import {
     TxTransfer,
     serialize,
     TxMassMigration,
-    TxCreate2Transfer
+    TxCreate2Transfer,
 } from "../../ts/tx";
 import { assert } from "chai";
 import { ethers } from "hardhat";
@@ -15,11 +15,11 @@ import { hashPubkey } from "../../ts/pubkey";
 
 describe("Tx Serialization", async () => {
     let c: TestTx;
-    before(async function() {
+    before(async function () {
         const [signer, ...rest] = await ethers.getSigners();
         c = await new TestTxFactory(signer).deploy();
     });
-    it("parse transfer transaction", async function() {
+    it("parse transfer transaction", async function () {
         const txs = TxTransfer.buildList(COMMIT_SIZE);
         const serialized = serialize(txs);
         assert.equal((await c.transferSize(serialized)).toNumber(), txs.length);
@@ -41,7 +41,7 @@ describe("Tx Serialization", async () => {
             assert.equal(message, txs[i].message());
         }
     });
-    it("parse create2transfer transaction", async function() {
+    it("parse create2transfer transaction", async function () {
         const txs = TxCreate2Transfer.buildList(COMMIT_SIZE);
         const serialized = serialize(txs);
         assert.equal(
@@ -52,13 +52,8 @@ describe("Tx Serialization", async () => {
         assert.isFalse(await c.create2transferHasExcessData(serialized));
 
         for (let i in txs) {
-            const {
-                fromIndex,
-                toIndex,
-                toPubkeyID,
-                amount,
-                fee
-            } = await c.create2TransferDecode(serialized, i);
+            const { fromIndex, toIndex, toPubkeyID, amount, fee } =
+                await c.create2TransferDecode(serialized, i);
 
             assert.equal(
                 fromIndex.toString(),
@@ -97,16 +92,16 @@ describe("Tx Serialization", async () => {
             assert.equal(message, txs[i].message());
         }
     });
-    it("serialize transfer transaction", async function() {
+    it("serialize transfer transaction", async function () {
         const txs = TxTransfer.buildList(COMMIT_SIZE);
         assert.equal(await c.transferSerialize(txs), serialize(txs));
     });
-    it("serialize create2transfer transaction", async function() {
+    it("serialize create2transfer transaction", async function () {
         const txs = TxCreate2Transfer.buildList(COMMIT_SIZE);
         assert.equal(await c.create2transferSerialize(txs), serialize(txs));
     });
 
-    it("massMigration", async function() {
+    it("massMigration", async function () {
         const txs = TxMassMigration.buildList(COMMIT_SIZE);
         const serialized = serialize(txs);
         const size = await c.massMigrationSize(serialized);
@@ -131,13 +126,13 @@ describe("Tx Serialization", async () => {
             );
         }
     });
-    it("encodeDecimal", async function() {
+    it("encodeDecimal", async function () {
         const edgeCases = [
             "4095000000",
             "4095",
             "409500000000",
             "0",
-            "4095000000000000000"
+            "4095000000000000000",
         ];
         const fuzzCases = [];
         for (let i = 0; i < 100; i++) {

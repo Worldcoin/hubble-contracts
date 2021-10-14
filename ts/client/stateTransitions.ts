@@ -95,7 +95,7 @@ export async function processTransferCommit(
             engine.revert(checkpoint);
         }
     }
-    const fees = sum(acceptedTxs.map(tx => tx.fee));
+    const fees = sum(acceptedTxs.map((tx) => tx.fee));
     await processReceiver(feeReceiverID, fees, tokenID, engine);
     return acceptedTxs;
 }

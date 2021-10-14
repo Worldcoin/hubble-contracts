@@ -17,7 +17,7 @@ async function main() {
 
     const constracts = await deployAll(signer, {
         ...TESTING_PARAMS,
-        GENESIS_STATE_ROOT: constants.HashZero
+        GENESIS_STATE_ROOT: constants.HashZero,
     });
     let commitments = [];
     for (let i = 0; i < commitmentsPerBatch; i++) {
@@ -37,9 +37,7 @@ async function main() {
     );
     const receipt = await tx.wait();
 
-    const revision = execSync("git rev-parse HEAD")
-        .toString()
-        .trim();
+    const revision = execSync("git rev-parse HEAD").toString().trim();
 
     const totalTxs = txPerCommitment * commitmentsPerBatch;
     const submitBatchGas = receipt.gasUsed.toNumber();
@@ -61,7 +59,7 @@ async function main() {
 
 main()
     .then(() => process.exit(0))
-    .catch(error => {
+    .catch((error) => {
         console.error(error);
         process.exit(1);
     });

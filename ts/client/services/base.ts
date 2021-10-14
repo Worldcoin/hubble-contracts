@@ -5,7 +5,7 @@ enum ServiceState {
     STARTING,
     RUNNING,
     STOPPING,
-    FINISHED
+    FINISHED,
 }
 
 export abstract class BaseService {
