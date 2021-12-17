@@ -1,10 +1,18 @@
-import { TestAccountTreeFactory } from "../../types/ethers-contracts/TestAccountTreeFactory";
-import { TestAccountTree } from "../../types/ethers-contracts/TestAccountTree";
+import {
+    TestAccountTree,
+    TestAccountTree__factory
+} from "../../types/ethers-contracts";
 import { Tree, Hasher } from "../../ts/tree";
 import { ethers } from "hardhat";
 import { assert } from "chai";
 import { randHex, randomLeaves } from "../../ts/utils";
 import { ZERO_BYTES32 } from "../../ts/constants";
+import { MemoryTree } from "../../ts/tree/memoryTree";
+
+type UpdateBatchLeafs = Parameters<TestAccountTree["updateBatch"]>[0];
+type CheckInclusionTreeWitness = Parameters<
+    TestAccountTree["checkInclusion"]
+>[2];
 
 let DEPTH: number;
 let BATCH_DEPTH: number;
@@ -15,12 +23,12 @@ describe("Account Tree", async () => {
     let hasher: Hasher;
     beforeEach(async function() {
         const accounts = await ethers.getSigners();
-        accountTree = await new TestAccountTreeFactory(accounts[0]).deploy();
+        accountTree = await new TestAccountTree__factory(accounts[0]).deploy();
         DEPTH = (await accountTree.DEPTH()).toNumber();
         BATCH_DEPTH = (await accountTree.BATCH_DEPTH()).toNumber();
         hasher = Hasher.new("bytes", ZERO_BYTES32);
-        treeLeft = Tree.new(DEPTH, hasher);
-        treeRight = Tree.new(DEPTH, hasher);
+        treeLeft = MemoryTree.new(DEPTH, hasher);
+        treeRight = MemoryTree.new(DEPTH, hasher);
     });
     it("empty tree construction", async function() {
         for (let i = 0; i < DEPTH; i++) {
@@ -59,7 +67,7 @@ describe("Account Tree", async () => {
             const leafIndexRight = Number(await accountTree.leafIndexRight());
             assert.equal(leafIndexRight, batchSize * k);
             treeRight.updateBatch(batchSize * k, leafs);
-            await accountTree.updateBatch(leafs);
+            await accountTree.updateBatch(leafs as UpdateBatchLeafs);
             assert.equal(treeRight.root, await accountTree.rootRight());
             const root = hasher.hash2(treeLeft.root, treeRight.root);
             assert.equal(root, await accountTree.root());
@@ -78,7 +86,7 @@ describe("Account Tree", async () => {
             const { 1: result } = await accountTree.callStatic.checkInclusion(
                 leaf,
                 leafIndex,
-                witness
+                witness as CheckInclusionTreeWitness
             );
             assert.isTrue(result);
         }
@@ -87,7 +95,7 @@ describe("Account Tree", async () => {
         const batchSize = 2 ** BATCH_DEPTH;
         const leafs = randomLeaves(batchSize);
         treeRight.updateBatch(0, leafs);
-        await accountTree.updateBatch(leafs);
+        await accountTree.updateBatch(leafs as UpdateBatchLeafs);
         let offset = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(DEPTH));
         for (let i = 0; i < batchSize; i += 41) {
             const leafIndex = offset.add(i);
@@ -96,7 +104,7 @@ describe("Account Tree", async () => {
             let { 1: result } = await accountTree.callStatic.checkInclusion(
                 leaf,
                 leafIndex,
-                witness
+                witness as CheckInclusionTreeWitness
             );
             assert.isTrue(result);
         }
@@ -109,7 +117,9 @@ describe("Account Tree", async () => {
     });
     it("gas cost: update tree batch", async function() {
         const leafs = randomLeaves(2 ** BATCH_DEPTH);
-        const gasCost = await accountTree.callStatic.updateBatch(leafs);
+        const gasCost = await accountTree.callStatic.updateBatch(
+            leafs as UpdateBatchLeafs
+        );
         console.log(gasCost.toNumber());
     });
 });

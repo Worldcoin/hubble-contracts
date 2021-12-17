@@ -4,11 +4,11 @@ import { TESTING_PARAMS } from "../../ts/constants";
 import { DeploymentParameters } from "../../ts/interfaces";
 import { randHex } from "../../ts/utils";
 import {
-    MockDepositManagerFactory,
-    TestRollupFactory
+    MockDepositManager,
+    MockDepositManager__factory,
+    TestRollup,
+    TestRollup__factory
 } from "../../types/ethers-contracts";
-import { MockDepositManager } from "../../types/ethers-contracts/MockDepositManager";
-import { TestRollup } from "../../types/ethers-contracts/TestRollup";
 
 describe("Rollback", function() {
     let rollup: TestRollup;
@@ -21,8 +21,8 @@ describe("Rollback", function() {
     }
     async function setup(param: DeploymentParameters) {
         const [signer] = await ethers.getSigners();
-        depositManager = await new MockDepositManagerFactory(signer).deploy();
-        rollup = await new TestRollupFactory(signer).deploy(
+        depositManager = await new MockDepositManager__factory(signer).deploy();
+        rollup = await new TestRollup__factory(signer).deploy(
             depositManager.address,
             param.STAKE_AMOUNT,
             param.BLOCKS_TO_FINALISE,
@@ -48,11 +48,11 @@ describe("Rollback", function() {
         const tx = await rollup.testRollback(numOfBatches - 1, {
             gasLimit: 1000000
         });
-        const [status] = await rollup.queryFilter(
-            rollup.filters.RollbackStatus(null, null, null),
-            tx.blockHash
-        );
-
+        const [[status], [event]] = await Promise.all([
+            rollup.queryFilter(rollup.filters.RollbackStatus(), tx.blockHash),
+            rollup.queryFilter(rollup.filters.RollbackTriggered(), tx.blockHash)
+        ]);
+        assert.equal(Number(event.args.batchID), numOfBatches - 1);
         assert.equal(await getTipBatchID(), numOfBatches - 2);
         assert.equal(Number(await rollup.invalidBatchMarker()), 0);
         assert.isTrue(status.args?.completed);
@@ -65,11 +65,13 @@ describe("Rollback", function() {
         await setup(param2);
         const gasleft = await rollup.callStatic.testRollback(1);
         console.log("Gas usage out of the loop", gasleft.toNumber());
-        const tx = await rollup.testRollback(1);
-        const [status] = await rollup.queryFilter(
-            rollup.filters.RollbackStatus(null, null, null),
-            tx.blockHash
-        );
+        const batchID = 1;
+        const tx = await rollup.testRollback(batchID);
+        const [[status], [event]] = await Promise.all([
+            rollup.queryFilter(rollup.filters.RollbackStatus(), tx.blockHash),
+            rollup.queryFilter(rollup.filters.RollbackTriggered(), tx.blockHash)
+        ]);
+        assert.equal(Number(event.args.batchID), batchID);
         assert.isFalse(status.args?.completed);
         assert.equal(Number(status.args?.startID), await getTipBatchID());
         assert.equal(Number(status.args?.nDeleted), 0);
@@ -77,12 +79,14 @@ describe("Rollback", function() {
 
     it("Test a long rollback", async function() {
         const nBatches = await getTipBatchID();
-        const tx = await rollup.testRollback(1, { gasLimit: 9500000 });
+        const batchID = 1;
+        const tx = await rollup.testRollback(batchID, { gasLimit: 9500000 });
 
-        const [status] = await rollup.queryFilter(
-            rollup.filters.RollbackStatus(null, null, null),
-            tx.blockHash
-        );
+        const [[status], [event]] = await Promise.all([
+            rollup.queryFilter(rollup.filters.RollbackStatus(), tx.blockHash),
+            rollup.queryFilter(rollup.filters.RollbackTriggered(), tx.blockHash)
+        ]);
+        assert.equal(Number(event.args.batchID), batchID);
         // Want to roll all the way to the start
         assert.isTrue(status.args?.completed);
         assert.equal(Number(status.args?.startID), numOfBatches - 1);
@@ -99,44 +103,24 @@ describe("Rollback", function() {
 
         const tx0 = await rollup.testRollback(badBatchID, { gasLimit: 500000 });
         expect(await getTipBatchID()).to.be.greaterThan(badBatchID);
-        const [status0] = await rollup.queryFilter(
-            rollup.filters.RollbackStatus(null, null, null),
-            tx0.blockHash
-        );
+        const [[status0], [event0]] = await Promise.all([
+            rollup.queryFilter(rollup.filters.RollbackStatus(), tx0.blockHash),
+            rollup.queryFilter(
+                rollup.filters.RollbackTriggered(),
+                tx0.blockHash
+            )
+        ]);
+        assert.equal(Number(event0.args.batchID), badBatchID);
         assert.isFalse(status0.args?.completed);
         assert.equal(Number(status0.args?.startID), tipBatchID);
 
         const tx1 = await rollup.keepRollingBack({ gasLimit: 8000000 });
         const [status1] = await rollup.queryFilter(
-            rollup.filters.RollbackStatus(null, null, null),
+            rollup.filters.RollbackStatus(),
             tx1.blockHash
         );
         assert.isTrue(status1.args?.completed);
         assert.equal(Number(await rollup.invalidBatchMarker()), 0);
         assert.equal(await getTipBatchID(), goodBatchID);
-    });
-    it("Test rollback with deposits", async function() {
-        const badBatchID = await getTipBatchID();
-        const [subtree1, subtree2, subtree3] = [
-            randHex(32),
-            randHex(32),
-            randHex(32)
-        ];
-        await rollup.submitDeposits(subtree1, { value: param.STAKE_AMOUNT });
-        await rollup.submitDummyBatch({ value: param.STAKE_AMOUNT });
-        await rollup.submitDeposits(subtree2, { value: param.STAKE_AMOUNT });
-        await rollup.submitDummyBatch({ value: param.STAKE_AMOUNT });
-        await rollup.submitDeposits(subtree3, { value: param.STAKE_AMOUNT });
-        const tx = await rollup.testRollback(badBatchID, { gasLimit: 1000000 });
-        const events = await depositManager.queryFilter(
-            depositManager.filters.DepositSubTreeReady(null, null),
-            tx.blockHash
-        );
-        assert.equal(events.length, 3);
-        const [event1, event2, event3] = events;
-        // Since we are rolling "back", the events are emitted in reverse order
-        assert.equal(event1.args?.subtreeRoot, subtree3);
-        assert.equal(event2.args?.subtreeRoot, subtree2);
-        assert.equal(event3.args?.subtreeRoot, subtree1);
     });
 });

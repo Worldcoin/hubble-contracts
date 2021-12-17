@@ -1,25 +1,21 @@
 import { ZERO_BYTES32 } from "../../constants";
 import { TreeAtLevelIsFull } from "../../exceptions";
-import { Hashable } from "../../interfaces";
-import { Hasher, Tree } from "../../tree";
-import { StorageEngine, WithWitness } from "./interfaces";
-
-export interface Entry<Item> {
-    itemID: number;
-    item: Item;
-}
+import { Hashable, Vacant } from "../../interfaces";
+import { Hasher } from "../../tree";
+import { MemoryTree } from "../../tree/memoryTree";
+import { StorageEngine, WithWitness, Entry } from "./interfaces";
 
 export class MemoryEngine<Item extends Hashable>
     implements StorageEngine<Item> {
     public static new(depth: number) {
         return new this(depth);
     }
-    private tree: Tree;
+    private tree: MemoryTree;
     private items: { [key: number]: Item } = {};
     private cache: { [key: number]: Item } = {};
     private journal: Entry<Item>[] = [];
     constructor(depth: number) {
-        this.tree = Tree.new(depth, Hasher.new("bytes", ZERO_BYTES32));
+        this.tree = MemoryTree.new(depth, Hasher.new("bytes", ZERO_BYTES32));
     }
     private checkSize(itemID: number) {
         if (itemID >= this.tree.setSize)
@@ -75,9 +71,7 @@ export class MemoryEngine<Item extends Hashable>
         this.cache = {};
     }
 
-    public async findVacantSubtree(
-        subtreeDepth: number
-    ): Promise<{ path: number; witness: string[] }> {
+    public async findVacantSubtree(subtreeDepth: number): Promise<Vacant> {
         const level = this.tree.depth - subtreeDepth;
         const zero = this.tree.zeros[level];
         for (let i = 0; i < 2 ** level; i++) {
@@ -101,7 +95,7 @@ export class MemoryEngine<Item extends Hashable>
 
             const witness = this.tree.witness(i, level).nodes;
             return {
-                path: i,
+                pathAtDepth: i,
                 witness
             };
         }

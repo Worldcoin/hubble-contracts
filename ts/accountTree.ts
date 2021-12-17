@@ -1,35 +1,39 @@
-import { Hasher, Tree } from "./tree";
-import { BlsAccountRegistry } from "../types/ethers-contracts/BlsAccountRegistry";
+import { Hasher } from "./tree";
+import { BLSAccountRegistry } from "../types/ethers-contracts";
 import { ethers } from "ethers";
 import { solG2 } from "./mcl";
 import { RegistrationFail, WrongBatchSize } from "./exceptions";
 import { ZERO_BYTES32 } from "./constants";
+import { MemoryTree } from "./tree/memoryTree";
+
+type RegisterBatchPubkeys = Parameters<BLSAccountRegistry["registerBatch"]>[0];
+type ExistsWitness = Parameters<BLSAccountRegistry["exists"]>[2];
 
 // Tree is 32 level depth, the index is still smaller than Number.MAX_SAFE_INTEGER
 export class AccountRegistry {
-    treeLeft: Tree;
-    treeRight: Tree;
+    treeLeft: MemoryTree;
+    treeRight: MemoryTree;
     leftIndex: number = 0;
     rightIndex: number = 0;
     setSize: number;
     batchSize: number;
 
     public static async new(
-        registry: BlsAccountRegistry
+        registry: BLSAccountRegistry
     ): Promise<AccountRegistry> {
         const depth = (await registry.DEPTH()).toNumber();
         const batchDepth = (await registry.BATCH_DEPTH()).toNumber();
         return new AccountRegistry(registry, depth, batchDepth);
     }
     constructor(
-        public readonly registry: BlsAccountRegistry,
+        public readonly registry: BLSAccountRegistry,
         private readonly depth: number,
         private readonly batchDepth: number
     ) {
         // Want the treeLeft and treeRight to have default hashes start with ZERO_BYTES32
         const hasher = Hasher.new("bytes", ZERO_BYTES32);
-        this.treeLeft = Tree.new(depth, hasher);
-        this.treeRight = Tree.new(depth, hasher);
+        this.treeLeft = MemoryTree.new(depth, hasher);
+        this.treeRight = MemoryTree.new(depth, hasher);
         this.setSize = 2 ** depth;
         this.batchSize = 2 ** batchDepth;
     }
@@ -51,7 +55,7 @@ export class AccountRegistry {
                 `Expect ${this.batchSize} pubkeys, got ${length}`
             );
         const rigthIndex = await this.syncRightIndex();
-        await this.registry.registerBatch(pubkeys);
+        await this.registry.registerBatch(pubkeys as RegisterBatchPubkeys);
         const leaves = pubkeys.map(key => this.pubkeyToLeaf(key));
         this.treeRight.updateBatch(rigthIndex, leaves);
         const firstPubkeyID = rigthIndex + this.setSize;
@@ -71,8 +75,12 @@ export class AccountRegistry {
     ): Promise<boolean> {
         // To do merkle check on chain, we only need 31 hashes in the witness
         // The 32 hash is the root of the left or right tree, which account tree will get it for us.
-        const _witness = this.witness(pubkeyID).slice(0, 31);
-        return await this.registry.exists(pubkeyID, pubkey, _witness);
+        const witness = this.witness(pubkeyID).slice(0, 31);
+        return await this.registry.exists(
+            pubkeyID,
+            pubkey,
+            witness as ExistsWitness
+        );
     }
     private async syncLeftIndex(): Promise<number> {
         this.leftIndex = (await this.registry.leafIndexLeft()).toNumber();

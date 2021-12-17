@@ -1,25 +1,30 @@
 import { ethers } from "hardhat";
-import { assert } from "chai";
+import chai, { assert } from "chai";
+import chaiAsPromised from "chai-as-promised";
 import { constants } from "ethers";
 import { solidityKeccak256 } from "ethers/lib/utils";
 import { allContracts } from "../../ts/allContractsInterfaces";
 import { TESTING_PARAMS } from "../../ts/constants";
 import { deployAll } from "../../ts/deploy";
 import { State } from "../../ts/state";
-import { Tree } from "../../ts/tree";
 import { randomLeaves } from "../../ts/utils";
-import { TestDepositCore } from "../../types/ethers-contracts/TestDepositCore";
-import { TestDepositCoreFactory } from "../../types/ethers-contracts/TestDepositCoreFactory";
+import {
+    TestDepositCore,
+    TestDepositCore__factory
+} from "../../types/ethers-contracts";
 import { TransferCommitment } from "../../ts/commitments";
 import { StateTree } from "../../ts/stateTree";
 import { ERC20ValueFactory } from "../../ts/decimal";
+import { MemoryTree } from "../../ts/tree/memoryTree";
+
+chai.use(chaiAsPromised);
 
 describe("Deposit Core", async function() {
     let contract: TestDepositCore;
     const maxSubtreeDepth = 4;
     before(async function() {
         const [signer] = await ethers.getSigners();
-        contract = await new TestDepositCoreFactory(signer).deploy(
+        contract = await new TestDepositCore__factory(signer).deploy(
             maxSubtreeDepth
         );
     });
@@ -27,7 +32,7 @@ describe("Deposit Core", async function() {
         for (let j = 0; j < 5; j++) {
             const maxSubtreeSize = 2 ** maxSubtreeDepth;
             const leaves = randomLeaves(maxSubtreeSize);
-            const tree = Tree.new(maxSubtreeDepth);
+            const tree = MemoryTree.new(maxSubtreeDepth);
             for (let i = 0; i < maxSubtreeSize; i++) {
                 const gasCost = await contract.callStatic.testInsertAndMerge(
                     leaves[i]
@@ -37,7 +42,7 @@ describe("Deposit Core", async function() {
                 );
                 const tx = await contract.testInsertAndMerge(leaves[i]);
                 const events = await contract.queryFilter(
-                    contract.filters.DepositSubTreeReady(null, null),
+                    contract.filters.DepositSubTreeReady(),
                     tx.blockHash
                 );
                 tree.updateSingle(i, leaves[i]);
@@ -48,7 +53,7 @@ describe("Deposit Core", async function() {
                         "No ready subtree should be emitted"
                     );
                 } else {
-                    assert.equal(events[0].args?.subtreeID, j + 1);
+                    assert.equal(events[0].args?.subtreeID.toNumber(), j + 1);
                     assert.equal(
                         events[0].args?.subtreeRoot,
                         tree.root,
@@ -85,11 +90,69 @@ describe("DepositManager", async function() {
             LARGE_AMOUNT_OF_TOKEN
         );
     });
-    it("should allow depositing 2 leaves in a subtree and merging it", async function() {
+    it("fails if batchID is incorrect", async function() {
+        const stateTree = StateTree.new(TESTING_PARAMS.MAX_DEPTH);
+        const vacancyProof = stateTree.getVacancyProof(
+            0,
+            TESTING_PARAMS.MAX_DEPOSIT_SUBTREE_DEPTH
+        );
+
+        const commit = TransferCommitment.new(
+            stateTree.root,
+            await contracts.blsAccountRegistry.root()
+        );
+        const batch = commit.toBatch();
+
+        const invalidBatchID = 1337;
+        await assert.isRejected(
+            contracts.rollup.submitDeposits(
+                invalidBatchID,
+                batch.proofCompressed(0),
+                vacancyProof,
+                { value: TESTING_PARAMS.STAKE_AMOUNT }
+            ),
+            /.*batchID does not match nextBatchID.*/
+        );
+    });
+    it("should bypass transfer if amount = 0", async function() {
+        const { depositManager, exampleToken } = contracts;
+        const amount = erc20.fromHumanValue("0");
+
+        const txDeposit = await depositManager.depositFor(
+            0,
+            amount.l1Value,
+            tokenID
+        );
+        const [event] = await exampleToken.queryFilter(
+            exampleToken.filters.Transfer(null, null, null),
+            txDeposit.blockHash
+        );
+        assert.isUndefined(event);
+    });
+    it("should fail if l1Amount is not a multiple of l2Unit", async function() {
+        const { depositManager } = contracts;
+        const amount = erc20.fromHumanValue("10");
+
+        await assert.isRejected(
+            depositManager.depositFor(0, amount.l1Value.sub(1), tokenID),
+            "l1Amount should be a multiple of l2Unit"
+        );
+    });
+    it("should fail if token allowance less than deposit amount", async function() {
+        const { depositManager } = contracts;
+        const amount = erc20.fromHumanValue("1000001");
+
+        await assert.isRejected(
+            depositManager.depositFor(0, amount.l1Value, tokenID),
+            "token allowance not approved"
+        );
+    });
+    it("should allow depositing 3 leaves in a subtree and merging the first 2", async function() {
         const { depositManager } = contracts;
         const amount = erc20.fromHumanValue("10");
         const deposit0 = State.new(0, tokenID, amount.l2Value, 0);
         const deposit1 = State.new(1, tokenID, amount.l2Value, 0);
+        const deposit2 = State.new(2, tokenID, amount.l2Value, 0);
         const pendingDeposit = solidityKeccak256(
             ["bytes", "bytes"],
             [deposit0.toStateLeaf(), deposit1.toStateLeaf()]
@@ -106,12 +169,14 @@ describe("DepositManager", async function() {
         );
 
         const [event0] = await depositManager.queryFilter(
-            depositManager.filters.DepositQueued(null, null, null),
+            depositManager.filters.DepositQueued(),
             txDeposit0.blockHash
         );
 
         const event0State = State.fromDepositQueuedEvent(event0);
         assert.equal(event0State.hash(), deposit0.hash());
+        assert.equal(event0.args.subtreeID.toNumber(), 1);
+        assert.equal(event0.args.depositID.toNumber(), 0);
 
         const txDeposit1 = await depositManager.depositFor(
             1,
@@ -123,19 +188,41 @@ describe("DepositManager", async function() {
             (await txDeposit1.wait()).gasUsed.toNumber()
         );
         const [event1] = await depositManager.queryFilter(
-            depositManager.filters.DepositQueued(null, null, null),
+            depositManager.filters.DepositQueued(),
             txDeposit1.blockHash
         );
 
         const event1State = State.fromDepositQueuedEvent(event1);
         assert.equal(event1State.hash(), deposit1.hash());
+        assert.equal(event1.args.subtreeID.toNumber(), 1);
+        assert.equal(event1.args.depositID.toNumber(), 1);
 
         const [eventReady] = await depositManager.queryFilter(
-            depositManager.filters.DepositSubTreeReady(null, null),
+            depositManager.filters.DepositSubTreeReady(),
             txDeposit1.blockHash
         );
         const subtreeRoot = eventReady.args?.subtreeRoot;
         assert.equal(subtreeRoot, pendingDeposit);
+
+        // Make sure subtreeID increments correctly
+        const txDeposit2 = await depositManager.depositFor(
+            2,
+            amount.l1Value,
+            tokenID
+        );
+        console.log(
+            "Deposit 2 transaction cost",
+            (await txDeposit2.wait()).gasUsed.toNumber()
+        );
+        const [event2] = await depositManager.queryFilter(
+            depositManager.filters.DepositQueued(),
+            txDeposit2.blockHash
+        );
+
+        const event2State = State.fromDepositQueuedEvent(event2);
+        assert.equal(event2State.hash(), deposit2.hash());
+        assert.equal(event2.args.subtreeID.toNumber(), 2);
+        assert.equal(event2.args.depositID.toNumber(), 0);
     });
 
     it("submit a deposit Batch to rollup", async function() {
@@ -153,7 +240,12 @@ describe("DepositManager", async function() {
             await blsAccountRegistry.root()
         );
         const initialBatch = initialCommitment.toBatch();
-        await initialBatch.submit(rollup, TESTING_PARAMS.STAKE_AMOUNT);
+        const initialBatchID = 1;
+        await initialBatch.submit(
+            rollup,
+            initialBatchID,
+            TESTING_PARAMS.STAKE_AMOUNT
+        );
         const amount = erc20.fromHumanValue("10");
 
         const stateLeaves = [];
@@ -164,14 +256,16 @@ describe("DepositManager", async function() {
             const state = State.new(i, tokenID, amount.l2Value, 0);
             stateLeaves.push(state.toStateLeaf());
         }
+        const nextBatchID = 2;
         await rollup.submitDeposits(
+            nextBatchID,
             initialBatch.proofCompressed(0),
             vacancyProof,
             { value: TESTING_PARAMS.STAKE_AMOUNT }
         );
         const batchID = Number(await rollup.nextBatchID()) - 1;
         const depositSubTreeRoot = await rollup.deposits(batchID);
-        const root = Tree.merklize(stateLeaves).root;
+        const root = MemoryTree.merklize(stateLeaves).root;
         assert.equal(depositSubTreeRoot, root);
     });
 });

@@ -19,9 +19,7 @@ contract MockDepositManager is IDepositManager {
         return (0, bytes32(0));
     }
 
-    function reenqueue(bytes32 subtreeRoot) external override {
-        emit DepositSubTreeReady(0, subtreeRoot);
-    }
+    function reenqueue(bytes32 subtreeRoot) external override {}
 }
 
 contract TestRollup is BatchManager {
@@ -52,7 +50,7 @@ contract TestRollup is BatchManager {
 
     function testRollback(uint256 batchID) external returns (uint256) {
         uint256 g = gasleft();
-        startRollingBack(batchID);
+        startRollingBack(batchID, Types.Result.BadSignature);
         return g - gasleft();
     }
 }

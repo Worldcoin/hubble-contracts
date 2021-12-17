@@ -1,6 +1,7 @@
+import minimist from "minimist";
 import { Hubble } from "../ts/hubble";
 
-const argv = require("minimist")(process.argv.slice(2), {
+const argv = minimist(process.argv.slice(2), {
     string: ["url", "tokenID", "pubkeys", "amount"]
 });
 
@@ -13,7 +14,7 @@ npm run deposit -- \
 async function main() {
     const providerUrl = argv.url || "http://localhost:8545";
 
-    const hubble = Hubble.fromDefault(providerUrl);
+    const hubble = await Hubble.fromDefault(providerUrl);
 
     let accIDs: number[] = [];
 

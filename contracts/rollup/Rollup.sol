@@ -107,6 +107,21 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         _;
     }
 
+    /**
+     * @dev When running multiple batch submissions in a single transaction,
+     * if one of the earlier batch submissions fails the latter submission
+     * will still proceed, be invalid since it depended on the earlier
+     * submission's state, and be slashed. To prevent this scenario,
+     * verify the expected batchID matches nextBatchID when a
+     * submission function is executed.
+     *
+     * @param batchID expected batch ID
+     */
+    modifier correctBatchID(uint256 batchID) {
+        require(batchID == nextBatchID, "batchID does not match nextBatchID");
+        _;
+    }
+
     function checkInclusion(
         bytes32 root,
         Types.CommitmentInclusionProof memory proof
@@ -181,11 +196,18 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
      * @dev This function should be highly optimized so that it can include as many commitments as possible
      */
     function submitTransfer(
+        uint256 batchID,
         bytes32[] calldata stateRoots,
         uint256[2][] calldata signatures,
         uint256[] calldata feeReceivers,
         bytes[] calldata txss
-    ) external payable onlyCoordinator isNotRollingBack {
+    )
+        external
+        payable
+        onlyCoordinator
+        isNotRollingBack
+        correctBatchID(batchID)
+    {
         bytes32[] memory leaves = new bytes32[](stateRoots.length);
         bytes32 accountRoot = accountRegistry.root();
         bytes32 bodyRoot;
@@ -213,11 +235,18 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
      * @dev This function should be highly optimized so that it can include as many commitments as possible
      */
     function submitCreate2Transfer(
+        uint256 batchID,
         bytes32[] calldata stateRoots,
         uint256[2][] calldata signatures,
         uint256[] calldata feeReceivers,
         bytes[] calldata txss
-    ) external payable onlyCoordinator isNotRollingBack {
+    )
+        external
+        payable
+        onlyCoordinator
+        isNotRollingBack
+        correctBatchID(batchID)
+    {
         bytes32[] memory leaves = new bytes32[](stateRoots.length);
         bytes32 accountRoot = accountRegistry.root();
         bytes32 bodyRoot;
@@ -246,12 +275,19 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
      * @dev This function should be highly optimized so that it can include as many commitments as possible
      */
     function submitMassMigration(
+        uint256 batchID,
         bytes32[] calldata stateRoots,
         uint256[2][] calldata signatures,
         uint256[4][] calldata meta,
         bytes32[] calldata withdrawRoots,
         bytes[] calldata txss
-    ) external payable onlyCoordinator isNotRollingBack {
+    )
+        external
+        payable
+        onlyCoordinator
+        isNotRollingBack
+        correctBatchID(batchID)
+    {
         bytes32[] memory leaves = new bytes32[](stateRoots.length);
         bytes32 accountRoot = accountRegistry.root();
         for (uint256 i = 0; i < stateRoots.length; i++) {
@@ -279,10 +315,11 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
     }
 
     function submitDeposits(
+        uint256 batchID,
         Types.CommitmentInclusionProof memory previous,
         Types.SubtreeVacancyProof memory vacant
-    ) public payable onlyCoordinator isNotRollingBack {
-        uint256 preBatchID = nextBatchID - 1;
+    ) public payable onlyCoordinator isNotRollingBack correctBatchID(batchID) {
+        uint256 preBatchID = batchID - 1;
         require(
             previous.path == batches[preBatchID].size() - 1,
             "previous commitment has wrong path"
@@ -352,7 +389,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         if (
             result != Types.Result.Ok ||
             (processedStateRoot != target.commitment.stateRoot)
-        ) startRollingBack(batchID);
+        ) startRollingBack(batchID, result);
     }
 
     function disputeTransitionMassMigration(
@@ -381,7 +418,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         if (
             result != Types.Result.Ok ||
             (processedStateRoot != target.commitment.stateRoot)
-        ) startRollingBack(batchID);
+        ) startRollingBack(batchID, result);
     }
 
     function disputeTransitionCreate2Transfer(
@@ -411,7 +448,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         if (
             result != Types.Result.Ok ||
             (processedStateRoot != target.commitment.stateRoot)
-        ) startRollingBack(batchID);
+        ) startRollingBack(batchID, result);
     }
 
     function disputeSignatureTransfer(
@@ -433,7 +470,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
             });
         Types.Result result = transfer.checkSignature(common, signatureProof);
 
-        if (result != Types.Result.Ok) startRollingBack(batchID);
+        if (result != Types.Result.Ok) startRollingBack(batchID, result);
     }
 
     function disputeSignatureMassMigration(
@@ -461,7 +498,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
                 target.commitment.body.spokeID
             );
 
-        if (result != Types.Result.Ok) startRollingBack(batchID);
+        if (result != Types.Result.Ok) startRollingBack(batchID, result);
     }
 
     function disputeSignatureCreate2Transfer(
@@ -485,6 +522,6 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         Types.Result result =
             create2Transfer.checkSignature(common, signatureProof);
 
-        if (result != Types.Result.Ok) startRollingBack(batchID);
+        if (result != Types.Result.Ok) startRollingBack(batchID, result);
     }
 }

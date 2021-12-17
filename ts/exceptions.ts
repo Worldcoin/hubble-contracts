@@ -191,3 +191,74 @@ export class StatusTransitionInvalid extends Error {
         this.name = "StatusTransitionInvalid";
     }
 }
+
+// GenesisBatchSyncExceptions
+
+export class NotFirstBatch extends Error {
+    constructor() {
+        super("genesis batch must be first batch");
+        this.name = "NotFirstBatch";
+    }
+}
+
+export class GenesisBatchCommitmentRootMismatch extends Error {
+    constructor(l1CommitmentRoot: string, l2CommitmentRoot: string) {
+        super(
+            `genesis batch commitmentRoot for l1 and l2 do not match. actual (l1): ${l1CommitmentRoot}, expected (l2): ${l2CommitmentRoot}`
+        );
+        this.name = "GenesisBatchCommitmentRootMismatch";
+    }
+}
+
+// ConfigurationExceptions
+
+export class MissingConfigPropError extends Error {
+    constructor(prop: string) {
+        super(`missing ${prop}`);
+        this.name = "MissingConfigPropError";
+    }
+}
+
+export class EmptyConfigPropError extends Error {
+    constructor(prop: string) {
+        super(`${prop} is empty`);
+        this.name = "EmptyConfigPropError";
+    }
+}
+
+// TransactionPoolExceptions
+
+export class PoolFullError extends Error {
+    constructor(maxSize: number) {
+        super(`pool full, max size of ${maxSize} reached`);
+        this.name = "PoolFullError";
+    }
+}
+
+export class PoolEmptyError extends Error {
+    constructor() {
+        super("pool empty");
+        this.name = "PoolEmptyError";
+    }
+}
+
+export class TokenPoolEmpty extends Error {
+    constructor(tokenID: string) {
+        super(`pool for tokenID ${tokenID} empty`);
+        this.name = "TokenPoolEmpty";
+    }
+}
+
+export class TokenNotConfiguredError extends Error {
+    constructor(tokenID: string) {
+        super(`tokenID ${tokenID} not configured`);
+        this.name = "TokenNotConfiguredError";
+    }
+}
+
+export class TokenPoolHighestFeeError extends Error {
+    constructor() {
+        super("unable to determine highest fee token for pool");
+        this.name = "TokenPoolHighestFeeError";
+    }
+}

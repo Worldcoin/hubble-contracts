@@ -1,46 +1,74 @@
 import { BigNumber } from "@ethersproject/bignumber";
+import { arrayify } from "@ethersproject/bytes";
 import chai, { assert } from "chai";
 import chaiAsPromised from "chai-as-promised";
+import del from "del";
+import { BlsSigner } from "../../ts/blsSigner";
+import { OffchainTx } from "../../ts/client/features/interface";
 import { TransferOffchainTx } from "../../ts/client/features/transfer";
 import { Status } from "../../ts/client/storageEngine/transactions/constants";
-import { TransactionStorage } from "../../ts/client/storageEngine/transactions/interfaces";
-import { TransactionMemoryStorage } from "../../ts/client/storageEngine/transactions/memory";
+import { TransactionDBStorage } from "../../ts/client/storageEngine/transactions/db";
 import {
     StatusTransitionInvalid,
     TransactionAlreadyExists,
     TransactionDoesNotExist
 } from "../../ts/exceptions";
+import * as mcl from "../../ts/mcl";
+import { randHex } from "../../ts/utils";
 
 chai.use(chaiAsPromised);
 
-describe("TransactionMemoryStorage", () => {
-    let storage: TransactionStorage;
+const txFactory = (
+    fromIndex: number,
+    toIndex: number,
+    amount: number,
+    fee: number,
+    nonce: number
+): OffchainTx => {
+    const tx = new TransferOffchainTx(
+        BigNumber.from(fromIndex),
+        BigNumber.from(toIndex),
+        BigNumber.from(amount),
+        BigNumber.from(fee),
+        BigNumber.from(nonce)
+    );
+    const signer = BlsSigner.new(arrayify(randHex(32)));
+    tx.signature = signer.sign(tx.message());
+    return tx;
+};
 
-    beforeEach(function() {
-        storage = new TransactionMemoryStorage();
+describe("TransactionDBStorage", () => {
+    let storage = new TransactionDBStorage();
+
+    before(async function() {
+        await del("./leveldb/*");
+        await mcl.init();
     });
 
     describe("get", () => {
-        it("returns undefined is transaction has not been added", async function() {
-            assert.isUndefined(await storage.get("abc123"));
+        it("throws error if transaction has not been added", async function() {
+            assert.isRejected(
+                storage.get("abc123"),
+                /.*Key not found in database*/
+            );
         });
 
         it("returns the correct transaction", async function() {
-            const fee = BigNumber.from(1);
+            const fee = 1;
             const txns = [
-                new TransferOffchainTx(0, 1, BigNumber.from(123), fee, 0),
-                new TransferOffchainTx(2, 3, BigNumber.from(456), fee, 0)
+                txFactory(0, 1, 123, fee, 0),
+                txFactory(2, 3, 456, fee, 0)
             ];
 
             await Promise.all(txns.map(async t => storage.pending(t)));
 
-            assert.equal(storage.count(), 2);
+            assert.equal(await storage.count(), 2);
 
             for (const t of txns) {
                 const txnStatus = await storage.get(t.message());
-                assert.equal(txnStatus?.transaction, t);
+                assert.equal(txnStatus?.transaction.hash(), t.hash());
                 const txnStatusFromTx = await storage.get(t);
-                assert.equal(txnStatusFromTx?.transaction, t);
+                assert.equal(txnStatusFromTx?.transaction.hash(), t.hash());
             }
         });
     });
@@ -48,17 +76,11 @@ describe("TransactionMemoryStorage", () => {
     describe("transaction lifecycle", () => {
         describe("succeeds", () => {
             it("properly transitions to finalized", async function() {
-                const txn = new TransferOffchainTx(
-                    4,
-                    5,
-                    BigNumber.from(1337),
-                    BigNumber.from(42),
-                    0
-                );
+                const txn = txFactory(4, 5, 1337, 42, 0);
                 const txnMsg = txn.message();
 
                 const pendingStatus = await storage.pending(txn);
-                assert.equal(pendingStatus.transaction, txn);
+                assert.equal(pendingStatus.transaction.hash(), txn.hash());
                 assert.equal(pendingStatus.status, Status.Pending);
 
                 const meta = {
@@ -67,7 +89,7 @@ describe("TransactionMemoryStorage", () => {
                     l1BlockIncluded: 101112
                 };
                 const submittedStatus = await storage.submitted(txnMsg, meta);
-                assert.equal(submittedStatus.transaction, txn);
+                assert.equal(submittedStatus.transaction.hash(), txn.hash());
                 assert.equal(submittedStatus.status, Status.Submitted);
                 assert.equal(submittedStatus.batchID, meta.batchID);
                 assert.equal(submittedStatus.l1TxnHash, meta.l1TxnHash);
@@ -77,7 +99,7 @@ describe("TransactionMemoryStorage", () => {
                 );
 
                 const finalizedStatus = await storage.finalized(txnMsg);
-                assert.equal(finalizedStatus.transaction, txn);
+                assert.equal(finalizedStatus.transaction.hash(), txn.hash());
                 assert.equal(finalizedStatus.status, Status.Finalized);
                 assert.equal(finalizedStatus.batchID, meta.batchID);
                 assert.equal(finalizedStatus.l1TxnHash, meta.l1TxnHash);
@@ -88,13 +110,7 @@ describe("TransactionMemoryStorage", () => {
             });
 
             it("properly transitions to failed state from pending", async function() {
-                const txn = new TransferOffchainTx(
-                    10,
-                    11,
-                    BigNumber.from(10101),
-                    BigNumber.from(101),
-                    0
-                );
+                const txn = txFactory(10, 11, 1010, 101, 0);
                 await storage.pending(txn);
 
                 const detail = "whoops";
@@ -102,19 +118,13 @@ describe("TransactionMemoryStorage", () => {
                     txn.message(),
                     detail
                 );
-                assert.equal(failedStatus.transaction, txn);
+                assert.equal(failedStatus.transaction.hash(), txn.hash());
                 assert.equal(failedStatus.status, Status.Failed);
                 assert.equal(failedStatus.detail, detail);
             });
 
             it("properly transitions to failed state from submitted", async function() {
-                const txn = new TransferOffchainTx(
-                    11,
-                    12,
-                    BigNumber.from(20202),
-                    BigNumber.from(202),
-                    0
-                );
+                const txn = txFactory(11, 12, 2020, 202, 0);
                 await storage.pending(txn);
                 const meta = {
                     batchID: 111,
@@ -128,7 +138,7 @@ describe("TransactionMemoryStorage", () => {
                     txn.message(),
                     detail
                 );
-                assert.equal(failedStatus.transaction, txn);
+                assert.equal(failedStatus.transaction.hash(), txn.hash());
                 assert.equal(failedStatus.status, Status.Failed);
                 assert.equal(failedStatus.detail, detail);
             });
@@ -136,13 +146,7 @@ describe("TransactionMemoryStorage", () => {
 
         describe("fails", () => {
             it("when already added", async function() {
-                const txn = new TransferOffchainTx(
-                    6,
-                    7,
-                    BigNumber.from(111),
-                    BigNumber.from(22),
-                    0
-                );
+                const txn = txFactory(6, 7, 111, 22, 0);
                 await storage.pending(txn);
                 await assert.isRejected(
                     storage.pending(txn),
@@ -172,13 +176,7 @@ describe("TransactionMemoryStorage", () => {
             });
 
             it("when transitioning to an improper state", async function() {
-                const txn = new TransferOffchainTx(
-                    9,
-                    0,
-                    BigNumber.from(420),
-                    BigNumber.from(69),
-                    0
-                );
+                const txn = txFactory(9, 0, 420, 69, 0);
                 const txnMsg = txn.message();
                 await storage.pending(txn);
 
@@ -218,13 +216,7 @@ describe("TransactionMemoryStorage", () => {
 
     describe("sync", () => {
         it("fails if transaction already exists", async function() {
-            const txn = new TransferOffchainTx(
-                111,
-                112,
-                BigNumber.from(421),
-                BigNumber.from(70),
-                0
-            );
+            const txn = txFactory(111, 112, 421, 70, 0);
             await storage.pending(txn);
 
             const meta = {
@@ -241,13 +233,7 @@ describe("TransactionMemoryStorage", () => {
         });
 
         it("successfully syncs a submitted transaction", async function() {
-            const txn = new TransferOffchainTx(
-                111,
-                222,
-                BigNumber.from(543),
-                BigNumber.from(65),
-                1
-            );
+            const txn = txFactory(111, 222, 543, 65, 1);
             const meta = {
                 batchID: 999,
                 l1TxnHash: "zzz999",
@@ -259,7 +245,7 @@ describe("TransactionMemoryStorage", () => {
                 finalized: false
             });
 
-            assert.equal(status.transaction, txn);
+            assert.equal(status.transaction.hash(), txn.hash());
             assert.equal(status.status, Status.Submitted);
             assert.equal(status.batchID, meta.batchID);
             assert.equal(status.l1TxnHash, meta.l1TxnHash);
@@ -267,13 +253,7 @@ describe("TransactionMemoryStorage", () => {
         });
 
         it("successfully syncs a finalized transaction", async function() {
-            const txn = new TransferOffchainTx(
-                111,
-                333,
-                BigNumber.from(345),
-                BigNumber.from(56),
-                0
-            );
+            const txn = txFactory(111, 333, 345, 56, 0);
             const meta = {
                 batchID: 111,
                 l1TxnHash: "aaa111",
@@ -285,7 +265,7 @@ describe("TransactionMemoryStorage", () => {
                 finalized: true
             });
 
-            assert.equal(status.transaction, txn);
+            assert.equal(status.transaction.hash(), txn.hash());
             assert.equal(status.status, Status.Finalized);
             assert.equal(status.batchID, meta.batchID);
             assert.equal(status.l1TxnHash, meta.l1TxnHash);

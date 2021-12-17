@@ -3,9 +3,10 @@ import { BigNumberish, BytesLike, ethers } from "ethers";
 import { Rollup } from "../types/ethers-contracts/Rollup";
 import { ZERO_BYTES32 } from "./constants";
 import { Usage, Wei } from "./interfaces";
+import { solG1 } from "./mcl";
 import { State } from "./state";
 import { MigrationTree, StateProvider } from "./stateTree";
-import { Tree } from "./tree";
+import { MemoryTree } from "./tree/memoryTree";
 import { serialize, TxMassMigration } from "./tx";
 import { sum } from "./utils";
 
@@ -72,7 +73,7 @@ export class TransferCommitment extends Commitment {
     public static new(
         stateRoot: BytesLike = ethers.constants.HashZero,
         accountRoot: BytesLike = ethers.constants.HashZero,
-        signature: BigNumberish[] = [0, 0],
+        signature: solG1 = [0, 0],
         feeReceiver: BigNumberish = 0,
         txs: BytesLike = "0x"
     ) {
@@ -87,7 +88,7 @@ export class TransferCommitment extends Commitment {
     constructor(
         public stateRoot: BytesLike,
         public accountRoot: BytesLike,
-        public signature: BigNumberish[],
+        public signature: solG1,
         public feeReceiver: BigNumberish,
         public txs: BytesLike
     ) {
@@ -119,7 +120,7 @@ export class MassMigrationCommitment extends Commitment {
     public static new(
         stateRoot: BytesLike = ethers.constants.HashZero,
         accountRoot: BytesLike = ethers.constants.HashZero,
-        signature: BigNumberish[] = [0, 0],
+        signature: solG1 = [0, 0],
         spokeID: BigNumberish = 0,
         withdrawRoot: BytesLike = ethers.constants.HashZero,
         tokenID: BigNumberish = 0,
@@ -142,7 +143,7 @@ export class MassMigrationCommitment extends Commitment {
     public static fromStateProvider(
         accountRoot: BytesLike,
         txs: TxMassMigration[],
-        signature: BigNumberish[],
+        signature: solG1,
         feeReceiver: number,
         stateProvider: StateProvider
     ) {
@@ -174,7 +175,7 @@ export class MassMigrationCommitment extends Commitment {
     constructor(
         public stateRoot: BytesLike,
         public accountRoot: BytesLike,
-        public signature: BigNumberish[],
+        public signature: solG1,
         public spokeID: BigNumberish,
         public withdrawRoot: BytesLike,
         public tokenID: BigNumberish,
@@ -236,9 +237,9 @@ export class Create2TransferCommitment extends TransferCommitment {
 }
 
 export class Batch {
-    private tree: Tree;
+    private tree: MemoryTree;
     constructor(public readonly commitments: Commitment[]) {
-        this.tree = Tree.merklize(commitments.map(c => c.hash()));
+        this.tree = MemoryTree.merklize(commitments.map(c => c.hash()));
     }
 
     get commitmentRoot(): string {
@@ -310,8 +311,9 @@ export class TransferBatch extends Batch {
         return new this(commitments);
     }
 
-    async submit(rollup: Rollup, stakingAmount: Wei) {
+    async submit(rollup: Rollup, batchID: BigNumberish, stakingAmount: Wei) {
         return await rollup.submitTransfer(
+            batchID,
             this.commitments.map(c => c.stateRoot),
             this.commitments.map(c => c.signature),
             this.commitments.map(c => c.feeReceiver),
@@ -356,8 +358,9 @@ export class MassMigrationBatch extends Batch {
         return new this(commitments);
     }
 
-    async submit(rollup: Rollup, stakingAmount: Wei) {
+    async submit(rollup: Rollup, batchID: BigNumberish, stakingAmount: Wei) {
         return await rollup.submitMassMigration(
+            batchID,
             this.commitments.map(c => c.stateRoot),
             this.commitments.map(c => c.signature),
             this.commitments.map(c => [
@@ -402,8 +405,9 @@ export class Create2TransferBatch extends Batch {
         return new this(commitments);
     }
 
-    async submit(rollup: Rollup, stakingAmount: Wei) {
+    async submit(rollup: Rollup, batchID: BigNumberish, stakingAmount: Wei) {
         return await rollup.submitCreate2Transfer(
+            batchID,
             this.commitments.map(c => c.stateRoot),
             this.commitments.map(c => c.signature),
             this.commitments.map(c => c.feeReceiver),

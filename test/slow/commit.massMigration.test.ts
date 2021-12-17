@@ -4,11 +4,12 @@ import { Group, txMassMigrationFactory } from "../../ts/factory";
 import { StateTree } from "../../ts/stateTree";
 import { hexToUint8Array, randHex } from "../../ts/utils";
 import {
-    BlsAccountRegistryFactory,
-    TestMassMigrationFactory
+    BLSAccountRegistry__factory,
+    ProofOfBurn__factory,
+    TestMassMigration,
+    TestMassMigration__factory
 } from "../../types/ethers-contracts";
 import * as mcl from "../../ts/mcl";
-import { TestMassMigration } from "../../types/ethers-contracts/TestMassMigration";
 import { serialize } from "../../ts/tx";
 import { assert } from "chai";
 import { Result } from "../../ts/interfaces";
@@ -36,9 +37,11 @@ describe("Rollup Mass Migration", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
-        const registryContract = await new BlsAccountRegistryFactory(
+        const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
+        await proofOfBurn.deployed();
+        const registryContract = await new BLSAccountRegistry__factory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
 
         registry = await AccountRegistry.new(registryContract);
         users = Group.new({ n: 32, domain: DOMAIN });
@@ -48,7 +51,7 @@ describe("Rollup Mass Migration", () => {
     });
     beforeEach(async function() {
         const [signer] = await ethers.getSigners();
-        rollup = await new TestMassMigrationFactory(signer).deploy();
+        rollup = await new TestMassMigration__factory(signer).deploy();
         stateTree = StateTree.new(STATE_TREE_DEPTH);
         users.connect(stateTree);
         users.createStates({ tokenID });

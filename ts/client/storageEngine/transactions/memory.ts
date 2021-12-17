@@ -102,7 +102,7 @@ export class TransactionMemoryStorage implements TransactionStorage {
         return txnStatus;
     }
 
-    public count(): number {
+    public async count(): Promise<number> {
         return Object.keys(this.transactionMessageToStatus).length;
     }
 

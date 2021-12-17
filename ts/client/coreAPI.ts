@@ -1,13 +1,13 @@
+import { arrayify } from "@ethersproject/bytes";
+import { providers, Signer } from "ethers";
+import { EventEmitter } from "events";
 import { Genesis } from "../genesis";
 import { Pubkey } from "../pubkey";
 import { State } from "../state";
-import { DepositPool } from "./features/deposit";
+import { DepositPool, IDepositPool } from "./features/deposit";
 import { StorageManager } from "./storageEngine";
-import { providers, Signer } from "ethers";
 import { allContracts } from "../allContractsInterfaces";
 import { BlsVerifier } from "../blsSigner";
-import { arrayify } from "@ethersproject/bytes";
-import { ITransferPool } from "./features/transfer";
 
 export class SyncedPoint {
     constructor(public blockNumber: number, public batchID: number) {}
@@ -52,20 +52,19 @@ export class CoreAPI implements ICoreAPI {
     private constructor(
         public readonly l2Storage: StorageManager,
         private readonly genesis: Genesis,
-        public readonly depositPool: DepositPool,
-        public readonly transferPool: ITransferPool,
+        public readonly depositPool: IDepositPool,
         private readonly provider: providers.Provider,
         public readonly contracts: allContracts,
         public readonly syncpoint: SyncedPoint,
-        public readonly verifier: BlsVerifier
+        public readonly verifier: BlsVerifier,
+        public readonly eventEmitter: EventEmitter
     ) {}
 
     static new(
         l2Storage: StorageManager,
         genesis: Genesis,
         provider: providers.Provider,
-        signer: Signer,
-        transferPool: ITransferPool
+        signer: Signer
     ) {
         const depositPool = new DepositPool(
             genesis.parameters.MAX_DEPOSIT_SUBTREE_DEPTH
@@ -73,18 +72,20 @@ export class CoreAPI implements ICoreAPI {
         const contracts = genesis.getContracts(signer);
         const syncedPoint = new SyncedPoint(
             genesis.auxiliary.genesisEth1Block,
-            0
+            -1
         );
         const verifier = new BlsVerifier(arrayify(genesis.auxiliary.domain));
+        const eventEmitter = new EventEmitter();
+
         return new this(
             l2Storage,
             genesis,
             depositPool,
-            transferPool,
             provider,
             contracts,
             syncedPoint,
-            verifier
+            verifier,
+            eventEmitter
         );
     }
 

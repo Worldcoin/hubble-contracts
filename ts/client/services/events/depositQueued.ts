@@ -1,19 +1,19 @@
 import { Event } from "ethers";
 import { State } from "../../../state";
 import { CoreAPI } from "../../coreAPI";
-import { DepositPool } from "../../features/deposit";
+import { IDepositPool } from "../../features/deposit";
 import { ContractEventSyncer } from "./contractEventSyncer";
 
 /**
  * Syncs DepositQueued events from the despositManager contract
  */
 export class DepositQueuedEventSyncer extends ContractEventSyncer {
-    private readonly depositPool: DepositPool;
+    private readonly depositPool: IDepositPool;
 
     constructor(api: CoreAPI) {
         super(
             api.contracts.depositManager,
-            api.contracts.depositManager.filters.DepositQueued(null, null, null)
+            api.contracts.depositManager.filters.DepositQueued()
         );
         this.eventListener = this.depositQueuedListener;
 
@@ -44,6 +44,8 @@ export class DepositQueuedEventSyncer extends ContractEventSyncer {
         pubkeyID: null,
         tokenID: null,
         l2Amount: null,
+        subtreeID: null,
+        depositID: null,
         event: Event
     ) => {
         this.handleDepositQueued(event);

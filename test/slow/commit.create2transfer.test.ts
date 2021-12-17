@@ -1,6 +1,9 @@
-import { TestCreate2TransferFactory } from "../../types/ethers-contracts/TestCreate2TransferFactory";
-import { TestCreate2Transfer } from "../../types/ethers-contracts/TestCreate2Transfer";
-import { BlsAccountRegistryFactory } from "../../types/ethers-contracts/BlsAccountRegistryFactory";
+import {
+    BLSAccountRegistry__factory,
+    ProofOfBurn__factory,
+    TestCreate2Transfer,
+    TestCreate2Transfer__factory
+} from "../../types/ethers-contracts";
 import { serialize } from "../../ts/tx";
 import * as mcl from "../../ts/mcl";
 import { StateTree } from "../../ts/stateTree";
@@ -13,11 +16,12 @@ import { Group, txCreate2TransferFactory } from "../../ts/factory";
 import { STATE_TREE_DEPTH } from "../../ts/constants";
 import { deployKeyless } from "../../ts/deployment/deploy";
 import { hashPubkey } from "../../ts/pubkey";
+import { BigNumber } from "ethers";
 
 const DOMAIN_HEX = randHex(32);
 const DOMAIN = hexToUint8Array(DOMAIN_HEX);
 const BAD_DOMAIN = hexToUint8Array(randHex(32));
-const tokenID = 5566;
+const tokenID = BigNumber.from(5566);
 
 describe("Rollup Create2Transfer Commitment", () => {
     let rollup: TestCreate2Transfer;
@@ -31,9 +35,11 @@ describe("Rollup Create2Transfer Commitment", () => {
         await mcl.init();
         const [signer] = await ethers.getSigners();
         await deployKeyless(signer, false);
-        const registryContract = await new BlsAccountRegistryFactory(
+        const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
+        await proofOfBurn.deployed();
+        const registryContract = await new BLSAccountRegistry__factory(
             signer
-        ).deploy();
+        ).deploy(proofOfBurn.address);
         registry = await AccountRegistry.new(registryContract);
         const nUsersWithStates = 32;
         const nUserWithoutState = nUsersWithStates;
@@ -60,10 +66,10 @@ describe("Rollup Create2Transfer Commitment", () => {
 
     beforeEach(async function() {
         const [signer] = await ethers.getSigners();
-        rollup = await new TestCreate2TransferFactory(signer).deploy();
+        rollup = await new TestCreate2Transfer__factory(signer).deploy();
         stateTree = StateTree.new(STATE_TREE_DEPTH);
         usersWithState.connect(stateTree);
-        usersWithState.createStates({ tokenID });
+        usersWithState.createStates({ tokenID: tokenID.toNumber() });
     });
 
     it("create2transfer commitment: signature check", async function() {

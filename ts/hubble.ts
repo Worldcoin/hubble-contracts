@@ -1,7 +1,7 @@
 import { allContracts } from "./allContractsInterfaces";
 import { DeploymentParameters } from "./interfaces";
-import { ExampleTokenFactory } from "../types/ethers-contracts";
-import { BigNumber, ethers, Signer } from "ethers";
+import { CustomToken__factory } from "../types/ethers-contracts";
+import { BigNumber, BigNumberish, ethers, Signer } from "ethers";
 import { solG2 } from "./mcl";
 import { toWei } from "./utils";
 import { Genesis } from "./genesis";
@@ -26,13 +26,13 @@ export class Hubble {
         return new Hubble(genesis.parameters, contracts, signer, group);
     }
 
-    static fromDefault(
+    static async fromDefault(
         providerUrl = "http://localhost:8545",
         genesisPath = "./genesis.json"
     ) {
         const provider = new ethers.providers.JsonRpcProvider(providerUrl);
         const signer = provider.getSigner();
-        const genesis = Genesis.fromConfig(genesisPath);
+        const genesis = await Genesis.fromConfig(genesisPath);
         return Hubble.fromGenesis(genesis, signer);
     }
 
@@ -42,22 +42,24 @@ export class Hubble {
     }
 
     async transfer(
-        fromIndex: number,
-        toIndex: number,
-        amount: number,
-        fee: number
+        fromIndex: BigNumberish,
+        toIndex: BigNumberish,
+        amount: BigNumberish,
+        fee: BigNumberish
     ) {
-        const state = await this.getState(fromIndex);
+        const fromIndexBN = BigNumber.from(fromIndex);
+        const { nonce } = await this.getState(fromIndexBN.toNumber());
 
-        const nonce = state.nonce;
         const tx = new TransferOffchainTx(
-            fromIndex,
-            toIndex,
+            fromIndexBN,
+            BigNumber.from(toIndex),
             BigNumber.from(amount),
             BigNumber.from(fee),
             nonce
         );
-        tx.signature = this.group.getUser(fromIndex).signRaw(tx.message());
+        tx.signature = this.group
+            .getUser(fromIndexBN.toNumber())
+            .signRaw(tx.message());
         const body = { bytes: tx.serialize() };
 
         const result = await fetchJson(
@@ -96,8 +98,8 @@ export class Hubble {
             `Depositing tokenID ${tokenID} for pubkeyID ${pubkeyIDs} each with amount ${amount}`
         );
         const { tokenRegistry, depositManager } = this.contracts;
-        const tokenAddress = await tokenRegistry.safeGetAddress(tokenID);
-        const erc20 = ExampleTokenFactory.connect(tokenAddress, this.signer);
+        const [tokenAddress] = await tokenRegistry.safeGetRecord(tokenID);
+        const erc20 = CustomToken__factory.connect(tokenAddress, this.signer);
         // approve depositmanager for amount
         const totalAmount = pubkeyIDs.length * amount;
         console.log("Approving total amount", totalAmount);

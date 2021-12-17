@@ -1,13 +1,10 @@
 import { BigNumber, Wallet } from "ethers";
 import { BlsSigner } from "./blsSigner";
-import {
-    StateMemoryEngine,
-    PubkeyMemoryEngine,
-    StorageManager
-} from "./client/storageEngine";
+import { PubkeyDatabaseEngine, StateDatabaseEngine } from "./client/database";
+import { StorageManager } from "./client/storageEngine";
 import { BatchMemoryStorage } from "./client/storageEngine/batches/memory";
 import { TransactionMemoryStorage } from "./client/storageEngine/transactions/memory";
-import { DEFAULT_MNEMONIC } from "./constants";
+import { DEFAULT_MNEMONIC, ZERO_BYTES32 } from "./constants";
 import { float16, USDT } from "./decimal";
 import { UserNotExist } from "./exceptions";
 import { Domain, solG1 } from "./mcl";
@@ -20,8 +17,11 @@ import {
     SignableTx,
     getAggregateSig
 } from "./tx";
+import { solidityPack } from "ethers/lib/utils";
 
 export class User {
+    private tokenIDtoStateID: Record<number, number>;
+
     static new(
         stateID: number,
         pubkeyID: number,
@@ -29,13 +29,13 @@ export class User {
         privKey?: string
     ) {
         const signer = BlsSigner.new(domain, privKey);
-        return new this(signer, stateID, pubkeyID);
+        const user = new this(signer, pubkeyID);
+        user.addStateID(0, stateID);
+        return user;
     }
-    constructor(
-        public blsSigner: BlsSigner,
-        public stateID: number,
-        public pubkeyID: number
-    ) {}
+    constructor(public blsSigner: BlsSigner, public pubkeyID: number) {
+        this.tokenIDtoStateID = [];
+    }
     public sign(tx: SignableTx) {
         return this.blsSigner.sign(tx.message());
     }
@@ -46,7 +46,30 @@ export class User {
         this.blsSigner.setDomain(domain);
         return this;
     }
+    public addStateID(tokenID: number, stateID: number) {
+        if (this.tokenIDtoStateID[tokenID] !== undefined) {
+            throw new Error(`stateID already set for tokenID ${tokenID}`);
+        }
 
+        this.tokenIDtoStateID[tokenID] = stateID;
+    }
+    public getStateID(tokenID: number): number {
+        if (this.tokenIDtoStateID[tokenID] === undefined) {
+            throw new Error(`stateID missing for tokenID ${tokenID}`);
+        }
+
+        return this.tokenIDtoStateID[tokenID];
+    }
+    public clearStateIDs() {
+        this.tokenIDtoStateID = {};
+    }
+    public changePubkeyID(pubkeyID: number) {
+        this.pubkeyID = pubkeyID;
+    }
+
+    get stateID() {
+        return this.getStateID(0);
+    }
     get pubkey() {
         return this.blsSigner.pubkey;
     }
@@ -196,7 +219,7 @@ export function txTransferFactory(
         const fee = float16.round(amount.div(10));
         const nonce = seenNonce[sender.stateID]
             ? seenNonce[sender.stateID] + 1
-            : senderState.nonce;
+            : senderState.nonce.toNumber();
         seenNonce[sender.stateID] = nonce;
         const tx = new TxTransfer(
             sender.stateID,
@@ -230,7 +253,7 @@ export function txCreate2TransferFactory(
         const fee = float16.round(amount.div(10));
         const nonce = seenNonce[sender.stateID]
             ? seenNonce[sender.stateID] + 1
-            : senderState.nonce;
+            : senderState.nonce.toNumber();
         seenNonce[sender.stateID] = nonce;
 
         const tx = new TxCreate2Transfer(
@@ -263,7 +286,7 @@ export function txMassMigrationFactory(
         const fee = float16.round(amount.div(10));
         const nonce = seenNonce[sender.stateID]
             ? seenNonce[sender.stateID] + 1
-            : senderState.nonce;
+            : senderState.nonce.toNumber();
         seenNonce[sender.stateID] = nonce;
 
         const tx = new TxMassMigration(
@@ -281,6 +304,46 @@ export function txMassMigrationFactory(
     return { txs, signature, senders };
 }
 
+export function txCreate2TransferToNonexistentReceiver(
+    registered: Group,
+    unregistered: Group
+): {
+    txs: TxCreate2Transfer[];
+    signature: solG1;
+    sender: User;
+} {
+    const sender = registered.getUser(0);
+    const receiver = unregistered.getUser(0);
+    const senderState = registered.getState(sender);
+    const amount = float16.round(senderState.balance.div(10));
+    const fee = float16.round(amount.div(10));
+
+    const tx = new TxCreate2Transfer(
+        sender.stateID,
+        receiver.stateID,
+        receiver.pubkey,
+        1000,
+        amount,
+        fee,
+        senderState.nonce.toNumber()
+    );
+    const txMessage = create2TransferMessage(tx, ZERO_BYTES32);
+    tx.signature = sender.signRaw(txMessage);
+    const txs = [tx];
+
+    return { txs: txs, signature: getAggregateSig(txs), sender };
+}
+
+function create2TransferMessage(
+    tx: TxCreate2Transfer,
+    pubkeyHash: string
+): string {
+    return solidityPack(
+        ["uint256", "uint256", "bytes32", "uint256", "uint256", "uint256"],
+        ["0x03", tx.fromIndex, pubkeyHash, tx.nonce, tx.amount, tx.fee]
+    );
+}
+
 interface StorageManagerFactoryOptions {
     stateTreeDepth?: number;
     pubkeyTreeDepth?: number;
@@ -292,8 +355,8 @@ export async function storageManagerFactory(
     const stateTreeDepth = options?.stateTreeDepth ?? 32;
     const pubkeyTreeDepth = options?.pubkeyTreeDepth ?? 32;
     return {
-        pubkey: new PubkeyMemoryEngine(pubkeyTreeDepth),
-        state: new StateMemoryEngine(stateTreeDepth),
+        pubkey: new PubkeyDatabaseEngine(pubkeyTreeDepth),
+        state: new StateDatabaseEngine(stateTreeDepth),
         batches: new BatchMemoryStorage(),
         transactions: new TransactionMemoryStorage()
     };
