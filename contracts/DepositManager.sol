@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import { Initializable } from "@openzeppelin/contracts/proxy/Initializable.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Types } from "./libs/Types.sol";
 import { ImmutableOwnable } from "./libs/ImmutableOwnable.sol";
 import { Rollup } from "./rollup/Rollup.sol";
@@ -30,13 +30,13 @@ interface IDepositManager {
         uint256 subtreeID,
         uint256 depositID
     );
-    /**
-     * @notice Event when a deposit subtree is ready
-     * to be submitted to the rollup
-     * @param subtreeID Subtree ID of deposits (1 ... n)
-     * @param subtreeRoot Merklized root of subtree
-     */
-    event DepositSubTreeReady(uint256 subtreeID, bytes32 subtreeRoot);
+    // /**
+    //  * @notice Event when a deposit subtree is ready
+    //  * to be submitted to the rollup
+    //  * @param subtreeID Subtree ID of deposits (1 ... n)
+    //  * @param subtreeRoot Merklized root of subtree
+    //  */
+    // event DepositSubTreeReady(uint256 subtreeID, bytes32 subtreeRoot);
 
     /**
      * @notice Max subtree depth for queued deposits
@@ -107,7 +107,7 @@ contract DepositCore is SubtreeQueue {
 
     uint256 public immutable paramMaxSubtreeSize;
 
-    constructor(uint256 maxSubtreeDepth) public {
+    constructor(uint256 maxSubtreeDepth) {
         paramMaxSubtreeSize = 1 << maxSubtreeDepth;
     }
 
@@ -182,7 +182,7 @@ contract DepositManager is
         ITokenRegistry _tokenRegistry,
         address _vault,
         uint256 maxSubtreeDepth
-    ) public DepositCore(maxSubtreeDepth) {
+    ) DepositCore(maxSubtreeDepth) {
         paramMaxSubtreeDepth = maxSubtreeDepth;
         tokenRegistry = _tokenRegistry;
         vault = _vault;

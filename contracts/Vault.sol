@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Initializable } from "@openzeppelin/contracts/proxy/Initializable.sol";
+import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Bitmap } from "./libs/Bitmap.sol";
 import { Types } from "./libs/Types.sol";
 import { MerkleTree } from "./libs/MerkleTree.sol";
@@ -23,7 +23,7 @@ contract Vault is Initializable, ImmutableOwnable {
 
     mapping(uint256 => uint256) private bitmap;
 
-    constructor(ITokenRegistry _tokenRegistry, SpokeRegistry _spokes) public {
+    constructor(ITokenRegistry _tokenRegistry, SpokeRegistry _spokes) {
         tokenRegistry = _tokenRegistry;
         spokes = _spokes;
     }

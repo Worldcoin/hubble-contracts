@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 import { BatchManager } from "../rollup/BatchManager.sol";
@@ -14,6 +14,7 @@ contract MockDepositManager is IDepositManager {
     function dequeueToSubmit()
         external
         override
+        pure
         returns (uint256 subtreeID, bytes32 subtreeRoot)
     {
         return (0, bytes32(0));
@@ -29,7 +30,6 @@ contract TestRollup is BatchManager {
         uint256 blocksToFinalise,
         uint256 minGasLeft
     )
-        public
         BatchManager(
             stakeAmount,
             blocksToFinalise,

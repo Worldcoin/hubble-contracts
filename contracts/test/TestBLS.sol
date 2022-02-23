@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { BLS } from "../libs/BLS.sol";
 
@@ -20,7 +20,7 @@ contract TestBLS {
         return BLS.verifySingle(signature, pubkey, message);
     }
 
-    function mapToPoint(uint256 e) external view returns (uint256[2] memory p) {
+    function mapToPoint(uint256 e) external pure returns (uint256[2] memory p) {
         return BLS.mapToPoint(e);
     }
 
@@ -68,7 +68,7 @@ contract TestBLS {
         uint256[2] calldata signature,
         uint256[4][] calldata pubkeys,
         uint256[2][] calldata messages
-    ) external returns (uint256) {
+    ) external view returns (uint256) {
         uint256 g = gasleft();
         bool callSuccess;
         bool checkSuccess;
@@ -86,7 +86,7 @@ contract TestBLS {
         uint256[2] calldata signature,
         uint256[4] calldata pubkey,
         uint256[2] calldata message
-    ) external returns (uint256) {
+    ) external view returns (uint256) {
         uint256 g = gasleft();
 
         bool callSuccess;
@@ -102,7 +102,7 @@ contract TestBLS {
     }
 
     function hashToPointGasCost(bytes32 domain, bytes calldata message)
-        external
+        external view
         returns (uint256 p)
     {
         uint256 g = gasleft();
@@ -111,7 +111,7 @@ contract TestBLS {
     }
 
     function isOnCurveG1GasCost(uint256[2] calldata point)
-        external
+        external view
         returns (uint256)
     {
         uint256 g = gasleft();
@@ -120,7 +120,7 @@ contract TestBLS {
     }
 
     function isOnCurveG2GasCost(uint256[4] calldata point)
-        external
+        external view
         returns (uint256)
     {
         uint256 g = gasleft();

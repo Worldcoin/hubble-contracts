@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { AccountTree } from "../AccountTree.sol";
 
@@ -23,7 +23,7 @@ contract TestAccountTree is AccountTree {
         bytes32 leaf,
         uint256 leafIndex,
         bytes32[WITNESS_LENGTH] calldata witness
-    ) external returns (uint256, bool) {
+    ) external view returns (uint256, bool) {
         uint256 operationGasCost = gasleft();
         bool s = _checkInclusion(leaf, leafIndex, witness);
         return (operationGasCost - gasleft(), s);

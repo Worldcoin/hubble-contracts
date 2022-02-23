@@ -52,15 +52,15 @@ diff --git a/contracts/proposers/BurnAuction.sol b/contracts/proposers/BurnAucti
 index 479b34d..963b30a 100644
 --- a/contracts/proposers/BurnAuction.sol
 +++ b/contracts/proposers/BurnAuction.sol
-@@ -7,8 +7,8 @@ import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+@@ -7,8 +7,8 @@ import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
  contract BurnAuction is Chooser {
      using SafeMath for uint256;
- 
+
 -    uint32 public constant BLOCKS_PER_SLOT = 100;
 -    uint32 public constant DELTA_BLOCKS_INITIAL_SLOT = 1000;
 +    uint32 public constant BLOCKS_PER_SLOT = 10;
 +    uint32 public constant DELTA_BLOCKS_INITIAL_SLOT = 20;
- 
+
      // donation numerator and demoninator are used to calculate donation amount
      uint256 public constant DONATION_DENOMINATOR = 10000;
 

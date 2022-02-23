@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 /**
     @notice The account tree is a `DEPTH + 1` Merkle tree of public keys.
@@ -24,7 +24,7 @@ contract AccountTree {
     bytes32[DEPTH] public filledSubtreesLeft;
     bytes32[DEPTH - BATCH_DEPTH] public filledSubtreesRight;
 
-    constructor() public {
+    constructor() {
         // prettier-ignore
         bytes32 firstZero = 0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563;
         // i = 0

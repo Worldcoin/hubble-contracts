@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 import { DepositCore } from "../DepositManager.sol";
 
 contract TestDepositCore is DepositCore {
-    constructor(uint256 maxSubtreeDepth) public DepositCore(maxSubtreeDepth) {}
+    constructor(uint256 maxSubtreeDepth) DepositCore(maxSubtreeDepth) {}
 
     function testInsertAndMerge(bytes32 depositLeaf)
         external

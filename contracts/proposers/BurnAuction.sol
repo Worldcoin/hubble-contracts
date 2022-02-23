@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Modified from https://github.com/iden3/rollup/blob/master/contracts/RollupBurnAuction.sol
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 import { Chooser } from "./Chooser.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract BurnAuction is Chooser {
     using SafeMath for uint256;
@@ -47,7 +47,6 @@ contract BurnAuction is Chooser {
      * Initializes auction for first slot
      */
     constructor(address payable _donationAddress, uint256 _donationNumerator)
-        public
     {
         require(
             _donationNumerator <= DONATION_DENOMINATOR,
@@ -91,7 +90,7 @@ contract BurnAuction is Chooser {
         // update coordinator with remaining value
         updateBalance(coordinator, msg.value, bidAmount);
         // set new best bider
-        auction[auctionSlot].coordinator = msg.sender;
+        auction[auctionSlot].coordinator = payable(msg.sender);
         auction[auctionSlot].amount = uint128(bidAmount);
         auction[auctionSlot].initialized = true;
         emit NewBestBid(auctionSlot, coordinator, bidAmount);
@@ -117,7 +116,7 @@ contract BurnAuction is Chooser {
     }
 
     function withdraw(uint256 amount) external {
-        address payable claimer = msg.sender;
+        address payable claimer = payable(msg.sender);
         require(
             deposits[claimer] >= amount,
             "BurnAuction, withdraw: insufficient deposit amount for withdraw"

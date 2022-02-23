@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 contract Proxy {
     // IMPLEMENTATION_SLOT is an arbitrary random hex
@@ -8,6 +8,10 @@ contract Proxy {
 
     fallback() external payable {
         _fallback();
+    }
+
+    receive() external payable {
+        // TODO
     }
 
     // solhint-disable-next-line func-name-mixedcase

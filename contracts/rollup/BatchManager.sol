@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import { Types } from "../libs/Types.sol";
 import { Bitmap } from "../libs/Bitmap.sol";
 import { IDepositManager } from "../DepositManager.sol";
@@ -69,7 +69,7 @@ contract BatchManager {
         uint256 _paramMinGasLeft,
         Chooser _chooser,
         IDepositManager _depositManager
-    ) internal {
+    ) {
         paramStakeAmount = _paramStakeAmount;
         paramBlocksToFinalise = _paramBlocksToFinalise;
         paramMinGasLeft = _paramMinGasLeft;
@@ -122,8 +122,8 @@ contract BatchManager {
         uint256 slashedAmount = nActual.mul(paramStakeAmount);
         uint256 reward = slashedAmount.mul(2).div(3);
         uint256 burn = slashedAmount.sub(reward);
-        msg.sender.transfer(reward);
-        address(0).transfer(burn);
+        payable(msg.sender).transfer(reward);
+        payable(address(0)).transfer(burn);
     }
 
     function keepRollingBack() external isRollingBack {
@@ -168,7 +168,7 @@ contract BatchManager {
         );
         Bitmap.setClaimed(batchID, withdrawalBitmap);
 
-        msg.sender.transfer(paramStakeAmount);
+        payable(msg.sender).transfer(paramStakeAmount);
         emit StakeWithdraw(msg.sender, batchID);
     }
 }

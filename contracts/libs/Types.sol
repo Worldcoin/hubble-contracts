@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 /**
  * @title DataTypes
@@ -40,23 +40,23 @@ library Types {
     }
 
     function encodeMeta(
-        uint256 batchType,
-        uint256 size,
-        address committer,
-        uint256 finaliseOn
+        uint256 _batchType,
+        uint256 _size,
+        address _committer,
+        uint256 _finaliseOn
     ) internal pure returns (bytes32) {
         uint256 meta = 0;
         assembly {
-            meta := or(shl(248, and(batchType, 0xff)), meta)
-            meta := or(shl(240, and(size, 0xff)), meta)
+            meta := or(shl(248, and(_batchType, 0xff)), meta)
+            meta := or(shl(240, and(_size, 0xff)), meta)
             meta := or(
                 shl(
                     80,
-                    and(committer, 0xffffffffffffffffffffffffffffffffffffffff)
+                    and(_committer, 0xffffffffffffffffffffffffffffffffffffffff)
                 ),
                 meta
             )
-            meta := or(shl(48, and(finaliseOn, 0xffffffff)), meta)
+            meta := or(shl(48, and(_finaliseOn, 0xffffffff)), meta)
         }
         return bytes32(meta);
     }
@@ -70,7 +70,7 @@ library Types {
     }
 
     function committer(Batch memory batch) internal pure returns (address) {
-        return address((uint256(batch.meta) >> 80) & ADDRESS_MASK);
+        return address(uint160((uint256(batch.meta) >> 80) & ADDRESS_MASK));
     }
 
     function finaliseOn(Batch memory batch) internal pure returns (uint256) {

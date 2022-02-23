@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { Chooser } from "../proposers/Chooser.sol";
 import { BurnAuction } from "../proposers/BurnAuction.sol";
@@ -7,18 +7,17 @@ import { BurnAuction } from "../proposers/BurnAuction.sol";
 contract MockRollup {
     Chooser public chooser;
 
-    constructor(Chooser _chooser) public {
+    constructor(Chooser _chooser) {
         chooser = _chooser;
     }
 
-    function submitBatch() external {
+    function submitBatch() external view {
         require(chooser.getProposer() == msg.sender, "Invalid proposer");
     }
 }
 
 contract TestBurnAuction is BurnAuction {
     constructor(address payable donationAddress, uint256 donationNumerator)
-        public
         BurnAuction(donationAddress, donationNumerator)
     {}
 

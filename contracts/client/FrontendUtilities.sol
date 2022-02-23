@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 import { DepositManager } from "../DepositManager.sol";
@@ -12,7 +12,7 @@ contract FrontendUtilities {
     constructor(
         DepositManager _depositManager,
         BLSAccountRegistry _accountRegistry
-    ) public {
+    ) {
         depositManager = _depositManager;
         accountRegistry = _accountRegistry;
     }

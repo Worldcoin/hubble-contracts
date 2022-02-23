@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 import { Transition } from "./libs/Transition.sol";
 import { Types } from "./libs/Types.sol";
 import { Tx } from "./libs/Tx.sol";
 import { Authenticity } from "./libs/Authenticity.sol";
-import { SafeMath } from "@openzeppelin/contracts/math/SafeMath.sol";
+import { SafeMath } from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 contract Create2Transfer {
     using Tx for bytes;

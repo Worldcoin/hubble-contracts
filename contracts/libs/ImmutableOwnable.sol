@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 /**
  * Immutable, non-transferable version of openzeppelin/contracts/access/Ownable
@@ -10,7 +10,7 @@ abstract contract ImmutableOwnable {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() internal {
+    constructor() {
         _owner = msg.sender;
     }
 

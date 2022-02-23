@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { Proxy } from "./Proxy.sol";
 
@@ -34,7 +34,7 @@ contract Deployer {
         return _calculateAddress(salt);
     }
 
-    function getDeploymentData() internal view returns (bytes memory) {
+    function getDeploymentData() internal pure returns (bytes memory) {
         return type(Proxy).creationCode;
     }
 

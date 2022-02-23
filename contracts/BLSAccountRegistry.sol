@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { AccountTree } from "./AccountTree.sol";
 import { BLS } from "./libs/BLS.sol";
@@ -15,7 +15,7 @@ contract BLSAccountRegistry is AccountTree {
     event SinglePubkeyRegistered(uint256 pubkeyID);
     event BatchPubkeyRegistered(uint256 startID, uint256 endID);
 
-    constructor(Chooser _chooser) public {
+    constructor(Chooser _chooser) {
         chooser = _chooser;
     }
 

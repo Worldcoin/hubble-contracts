@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 // This moves in 4.x to openzeppelin/contracts/utils/cryptography/draft-EIP712.sol
-import { EIP712 } from "@openzeppelin/contracts/drafts/EIP712.sol";
+import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import { IEIP712 } from "../libs/EIP712.sol";
 import { Types } from "../libs/Types.sol";
 import { Tx } from "../libs/Tx.sol";
@@ -59,7 +59,6 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         uint256 minGasLeft,
         uint256 maxTxsPerCommit
     )
-        public
         BatchManager(
             stakeAmount,
             blocksToFinalise,
@@ -145,7 +144,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
         if (targetPath == 0) {
             // target is the first commit in the batch, so the previous commit is in the previous batch
             expectedBatchID = batchID - 1;
-            previousPath = batches[expectedBatchID].size() - 1;
+            previousPath = Types.size(batches[expectedBatchID]) - 1;
         } else {
             // target and previous commits are both in the current batch
             expectedBatchID = batchID;
@@ -321,7 +320,7 @@ contract Rollup is BatchManager, EIP712, IEIP712 {
     ) public payable onlyCoordinator isNotRollingBack correctBatchID(batchID) {
         uint256 preBatchID = batchID - 1;
         require(
-            previous.path == batches[preBatchID].size() - 1,
+            previous.path == Types.size(batches[preBatchID]) - 1,
             "previous commitment has wrong path"
         );
         require(

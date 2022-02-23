@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity ^0.8.4;
 
 import { Chooser } from "../proposers/Chooser.sol";
 
 contract ProofOfBurn is Chooser {
     address public coordinator;
 
-    constructor() public {
+    constructor() {
         coordinator = msg.sender;
     }
 
