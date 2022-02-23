@@ -13,8 +13,8 @@ contract ProofOfAuthority is Chooser {
     }
 
     function getProposer() external view override returns (address) {
-        if (proposers[msg.sender]) {
-            return msg.sender;
+        if (proposers[tx.origin]) {
+            return tx.origin;
         }
         return address(0);
     }
