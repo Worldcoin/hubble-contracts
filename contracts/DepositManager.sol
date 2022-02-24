@@ -30,13 +30,6 @@ interface IDepositManager {
         uint256 subtreeID,
         uint256 depositID
     );
-    // /**
-    //  * @notice Event when a deposit subtree is ready
-    //  * to be submitted to the rollup
-    //  * @param subtreeID Subtree ID of deposits (1 ... n)
-    //  * @param subtreeRoot Merklized root of subtree
-    //  */
-    // event DepositSubTreeReady(uint256 subtreeID, bytes32 subtreeRoot);
 
     /**
      * @notice Max subtree depth for queued deposits
