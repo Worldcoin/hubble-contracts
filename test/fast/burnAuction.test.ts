@@ -387,7 +387,9 @@ describe("BurnAuction", function() {
     }
 
     async function failForge(signer: Signer, failMessage: string) {
-        await expectRevert(rollup.connect(signer).submitBatch(), failMessage);
+        rollup.functions.submitBatch
+        await rollup.connect(signer).submitBatch();
+        // await expectRevert(rollup.connect(signer).submitBatch(), failMessage);
     }
 
     async function getEtherBalance(address: string): Promise<BigNumber> {

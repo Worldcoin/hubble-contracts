@@ -10,9 +10,7 @@ contract Proxy {
         _fallback();
     }
 
-    receive() external payable {
-        // TODO
-    }
+    receive() external payable {}
 
     // solhint-disable-next-line func-name-mixedcase
     function __initialize__(address implementation) external {
