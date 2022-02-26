@@ -110,7 +110,7 @@ export class TransactionDBStorage implements TransactionStorage {
             if (itemFound) {
                 throw new TransactionAlreadyExists(txnMessage);
             }
-        } catch (error) {
+        } catch (error: any) {
             if (error.name !== "NotFoundError") {
                 throw error;
             }
@@ -127,7 +127,7 @@ export class TransactionDBStorage implements TransactionStorage {
     private async getStatusOrFail(message: string): Promise<TransactionStatus> {
         try {
             return await this.get(message);
-        } catch (error) {
+        } catch (error: any) {
             if (error.name === "NotFoundError") {
                 throw new TransactionDoesNotExist(message);
             }

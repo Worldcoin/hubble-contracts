@@ -381,7 +381,7 @@ async function pack(
                 storageManager,
                 verifier
             );
-        } catch (err) {
+        } catch (err: any) {
             console.error(`bad tx ${tx.hash()}  ${err}`);
             failedTxs.push({ tx, err });
             continue;
