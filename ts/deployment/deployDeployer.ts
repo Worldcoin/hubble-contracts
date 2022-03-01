@@ -29,7 +29,6 @@ export async function deployDeployer(
         );
         return true;
     }
-    console.log("Deployer address", deployer.contractAddress);
     assert(DEPLOYER_ADDRESS == deployer.contractAddress);
 
     const receipt = await deployer.fundAndDeploy(signer);

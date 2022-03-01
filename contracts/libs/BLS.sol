@@ -40,7 +40,7 @@ library BLS {
 
     // estimator address
     address private constant COST_ESTIMATOR_ADDRESS =
-        0x92415f0cde4E7730c30ca1F7A48099a1419e4982;
+        0x9F19c6456854FDA109DFC2B9aD45d9BF147c8557;
 
     function verifySingle(
         uint256[2] memory signature,
