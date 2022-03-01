@@ -88,7 +88,7 @@ contract BurnAuction is Chooser {
         );
         // update coordinator with remaining value
         updateBalance(coordinator, msg.value, bidAmount);
-        // set new best bider
+        // set new best bidder
         auction[auctionSlot].coordinator = payable(msg.sender);
         auction[auctionSlot].amount = uint128(bidAmount);
         auction[auctionSlot].initialized = true;
