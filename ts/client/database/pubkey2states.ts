@@ -15,7 +15,7 @@ export class Pubkey2StatesDB {
             const states: string = await pubkey2statesDB.get(pubkeyHash);
             const appended = _.union<number>(JSON.parse(states), [stateID]);
             await pubkey2statesDB.put(pubkeyHash, JSON.stringify(appended));
-        } catch (error: any) {
+        } catch (error) {
             if (error.name === "NotFoundError") {
                 await pubkey2statesDB.put(
                     pubkeyHash,

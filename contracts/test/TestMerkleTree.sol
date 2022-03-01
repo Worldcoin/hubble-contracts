@@ -17,7 +17,8 @@ contract TestMerkleTree {
     }
 
     function testMerklize(bytes32[] memory nodes)
-        public view
+        public
+        view
         returns (bytes32, uint256)
     {
         bytes32 inputNode = nodes[0];

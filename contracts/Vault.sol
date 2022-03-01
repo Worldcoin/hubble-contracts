@@ -3,7 +3,9 @@ pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Initializable } from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import {
+    Initializable
+} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import { Bitmap } from "./libs/Bitmap.sol";
 import { Types } from "./libs/Types.sol";
 import { MerkleTree } from "./libs/MerkleTree.sol";

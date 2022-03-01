@@ -46,8 +46,7 @@ contract BurnAuction is Chooser {
      * Set first block where the slot will begin
      * Initializes auction for first slot
      */
-    constructor(address payable _donationAddress, uint256 _donationNumerator)
-    {
+    constructor(address payable _donationAddress, uint256 _donationNumerator) {
         require(
             _donationNumerator <= DONATION_DENOMINATOR,
             "BurnAuction, constructor: bad denominator"

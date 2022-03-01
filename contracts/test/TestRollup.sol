@@ -13,8 +13,8 @@ contract MockDepositManager is IDepositManager {
 
     function dequeueToSubmit()
         external
-        override
         pure
+        override
         returns (uint256 subtreeID, bytes32 subtreeRoot)
     {
         return (0, bytes32(0));

@@ -38,7 +38,7 @@ export class DBTree implements AsyncTree {
     public async getNode(level: number, index: number): Promise<Node> {
         try {
             return await ItemNode.fromDB(this.nodeType, level, index);
-        } catch (error: any) {
+        } catch (error) {
             if (error.name === "NotFoundError") {
                 return this.zeros[level];
             } else {

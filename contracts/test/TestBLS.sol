@@ -102,7 +102,8 @@ contract TestBLS {
     }
 
     function hashToPointGasCost(bytes32 domain, bytes calldata message)
-        external view
+        external
+        view
         returns (uint256 p)
     {
         uint256 g = gasleft();
@@ -111,7 +112,8 @@ contract TestBLS {
     }
 
     function isOnCurveG1GasCost(uint256[2] calldata point)
-        external view
+        external
+        view
         returns (uint256)
     {
         uint256 g = gasleft();
@@ -120,7 +122,8 @@ contract TestBLS {
     }
 
     function isOnCurveG2GasCost(uint256[4] calldata point)
-        external view
+        external
+        view
         returns (uint256)
     {
         uint256 g = gasleft();

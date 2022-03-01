@@ -3,7 +3,9 @@ pragma solidity ^0.8.4;
 pragma experimental ABIEncoderV2;
 
 // This moves in 4.x to openzeppelin/contracts/utils/cryptography/draft-EIP712.sol
-import { EIP712 } from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
+import {
+    EIP712
+} from "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import { IEIP712 } from "../libs/EIP712.sol";
 import { Types } from "../libs/Types.sol";
 import { Tx } from "../libs/Tx.sol";
