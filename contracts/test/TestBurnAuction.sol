@@ -11,7 +11,7 @@ contract MockRollup {
         chooser = _chooser;
     }
 
-    function submitBatch() external view {
+    function submitBatch() external {
         require(chooser.getProposer() == msg.sender, "Invalid proposer");
     }
 }
