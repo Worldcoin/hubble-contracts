@@ -22,7 +22,7 @@ const DOMAIN = hexToUint8Array(DOMAIN_HEX);
 const BAD_DOMAIN = hexToUint8Array(randHex(32));
 const tokenID = BigNumber.from(5566);
 
-describe.only("Rollup Transfer Commitment", () => {
+describe("Rollup Transfer Commitment", () => {
     let rollup: TestTransfer;
     let registry: AccountRegistry;
     let stateTree: StateTree;
