@@ -11,7 +11,7 @@ contract Proxy {
     }
 
     receive() external payable {
-        revert();
+        revert("Proxy: received Eth");
     }
 
     // solhint-disable-next-line func-name-mixedcase

@@ -1,10 +1,11 @@
 {
   "extends": "solhint:recommended",
   "rules": {
-    "compiler-version": ["error","^0.6.12"],
+    "compiler-version": ["error","^0.8.4"],
     "reason-string": ["warn",{"maxLength":80}],
     "var-name-mixedcase": ["error"],
     "func-name-mixedcase": ["error"],
-    "no-inline-assembly": "off"
+    "no-inline-assembly": "off",
+    "func-visibility": ["warn",{"ignoreConstructors":true}]
   }
 }
