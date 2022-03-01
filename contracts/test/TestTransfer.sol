@@ -15,7 +15,7 @@ contract TestTransfer is Transfer {
         bytes32 accountRoot,
         bytes32 domain,
         bytes memory txs
-    ) public view returns (uint256, Types.Result) {
+    ) public returns (uint256, Types.Result) {
         uint256 operationCost = gasleft();
         Types.AuthCommon memory common =
             Types.AuthCommon({

@@ -6,17 +6,13 @@ import { BurnAuction } from "../proposers/BurnAuction.sol";
 
 contract MockRollup {
     Chooser public chooser;
-    // `submitBatch` must not be view for our tests, this removes compiler warning.
-    event BatchSubmitted();
 
     constructor(Chooser _chooser) {
         chooser = _chooser;
     }
 
-    //
     function submitBatch() external {
         require(chooser.getProposer() == msg.sender, "Invalid proposer");
-        emit BatchSubmitted();
     }
 }
 

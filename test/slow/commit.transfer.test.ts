@@ -22,7 +22,7 @@ const DOMAIN = hexToUint8Array(DOMAIN_HEX);
 const BAD_DOMAIN = hexToUint8Array(randHex(32));
 const tokenID = BigNumber.from(5566);
 
-describe("Rollup Transfer Commitment", () => {
+describe.only("Rollup Transfer Commitment", () => {
     let rollup: TestTransfer;
     let registry: AccountRegistry;
     let stateTree: StateTree;
@@ -109,8 +109,8 @@ describe("Rollup Transfer Commitment", () => {
             DOMAIN,
             serialized
         );
-        // const receipt = await tx.wait();
-        // console.log("transaction gas cost:", receipt.gasUsed?.toNumber());
+        const receipt = await tx.wait();
+        console.log("transaction gas cost:", receipt.gasUsed?.toNumber());
     }).timeout(400000);
     it("transfer commitment: signature check, with 2 more tx from same sender", async function() {
         const fewSenderGroup = users.slice(3);

@@ -139,8 +139,8 @@ describe("Rollup Create2Transfer Commitment", () => {
             DOMAIN,
             serialized
         );
-        // const receipt = await checkSigTx.wait();
-        // console.log("transaction gas cost:", receipt.gasUsed?.toNumber());
+        const receipt = await checkSigTx.wait();
+        console.log("transaction gas cost:", receipt.gasUsed?.toNumber());
     }).timeout(800000);
     it("transfer commitment: signature check, with 2 more tx from same sender", async function() {
         const fewSenderGroup = usersWithState.slice(5);
