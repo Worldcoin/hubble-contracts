@@ -1,5 +1,6 @@
 import {
     BLSAccountRegistry__factory,
+    DefaultBLSAccountRegistry__factory,
     ProofOfBurn__factory,
     TestCreate2Transfer,
     TestCreate2Transfer__factory
@@ -37,9 +38,14 @@ describe("Rollup Create2Transfer Commitment", () => {
         await deployKeyless(signer, false);
         const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
         await proofOfBurn.deployed();
-        const registryContract = await new BLSAccountRegistry__factory(
+        const defaultRegistryContract = await new DefaultBLSAccountRegistry__factory(
             signer
         ).deploy(proofOfBurn.address);
+        const registryContract = BLSAccountRegistry__factory.connect(
+            defaultRegistryContract.address,
+            signer
+        );
+
         registry = await AccountRegistry.new(registryContract);
         const nUsersWithStates = 32;
         const nUserWithoutState = nUsersWithStates;

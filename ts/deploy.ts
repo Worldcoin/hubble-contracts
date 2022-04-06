@@ -6,6 +6,7 @@ import {
     DepositManager__factory,
     Rollup__factory,
     BLSAccountRegistry__factory,
+    DefaultBLSAccountRegistry__factory,
     FrontendGeneric__factory,
     FrontendTransfer__factory,
     FrontendMassMigration__factory,
@@ -77,10 +78,18 @@ export async function deployAll(
         chooserAddress = proofOfBurn.address;
     }
 
-    const blsAccountRegistry = await new BLSAccountRegistry__factory(
+    const defaultAccountRegistry = await new DefaultBLSAccountRegistry__factory(
         signer
     ).deploy(chooserAddress);
-    await waitAndRegister(blsAccountRegistry, "blsAccountRegistry", verbose);
+    await waitAndRegister(
+        defaultAccountRegistry,
+        "blsAccountRegistry",
+        verbose
+    );
+    const blsAccountRegistry = BLSAccountRegistry__factory.connect(
+        defaultAccountRegistry.address,
+        signer
+    );
 
     // deploy Token registry contract
     const tokenRegistry = await new TokenRegistry__factory(signer).deploy();

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { AccountTree } from "../AccountTree.sol";
+import { DefaultAccountTree } from "../DefaultAccountTree.sol";
 
-contract TestAccountTree is AccountTree {
+contract TestAccountTree is DefaultAccountTree {
     function updateSingle(bytes32 leaf) external returns (uint256) {
         uint256 operationGasCost = gasleft();
         _updateSingle(leaf);

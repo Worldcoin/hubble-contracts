@@ -15,7 +15,12 @@ contract BLSAccountRegistry is AccountTree {
     event SinglePubkeyRegistered(uint256 pubkeyID);
     event BatchPubkeyRegistered(uint256 startID, uint256 endID);
 
-    constructor(Chooser _chooser) {
+    constructor(
+        Chooser _chooser,
+        bytes32 rootLeft,
+        uint256 leafIndexLeft,
+        bytes32[DEPTH] memory filledSubtreesLeft
+    ) public AccountTree(rootLeft, leafIndexLeft, filledSubtreesLeft) {
         chooser = _chooser;
     }
 

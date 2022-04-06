@@ -24,24 +24,34 @@ contract AccountTree {
     bytes32[DEPTH] public filledSubtreesLeft;
     bytes32[DEPTH - BATCH_DEPTH] public filledSubtreesRight;
 
-    constructor() {
+    /*
+     * To create an empty tree use DefaultAccountTree.sol
+     * It passes in:
+     * - initialRootLeft = zeros[DEPTH]
+     * - initialLeafIndexLeft = 0
+     * - initialFilledSubtreesLeft[i] = zeros[i]
+     */
+    constructor(
+        bytes32 initialRootLeft,
+        uint256 initialLeafIndexLeft,
+        bytes32[DEPTH] memory initialFilledSubtreesLeft
+    ) public {
         // prettier-ignore
         bytes32 firstZero = 0x290decd9548b62a8d60345a988386fc84ba6bc95484008f6362f93160ef3e563;
         // i = 0
         zeros[0] = firstZero;
-        filledSubtreesLeft[0] = firstZero;
         // i > 0
         for (uint256 i = 1; i < DEPTH; i++) {
             zeros[i] = keccak256(abi.encode(zeros[i - 1], zeros[i - 1]));
-            if (DEPTH > i) {
-                filledSubtreesLeft[i] = zeros[i];
-            }
             if (BATCH_DEPTH <= i && DEPTH > i) {
                 filledSubtreesRight[i - BATCH_DEPTH] = zeros[i];
             }
         }
 
-        rootLeft = keccak256(abi.encode(zeros[DEPTH - 1], zeros[DEPTH - 1]));
+        filledSubtreesLeft = initialFilledSubtreesLeft;
+        leafIndexLeft = initialLeafIndexLeft;
+
+        rootLeft = initialRootLeft;
         rootRight = keccak256(abi.encode(zeros[DEPTH - 1], zeros[DEPTH - 1]));
         root = keccak256(abi.encode(rootLeft, rootRight));
     }

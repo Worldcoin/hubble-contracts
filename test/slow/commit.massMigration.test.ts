@@ -5,6 +5,7 @@ import { StateTree } from "../../ts/stateTree";
 import { hexToUint8Array, randHex } from "../../ts/utils";
 import {
     BLSAccountRegistry__factory,
+    DefaultBLSAccountRegistry__factory,
     ProofOfBurn__factory,
     TestMassMigration,
     TestMassMigration__factory
@@ -39,9 +40,13 @@ describe("Rollup Mass Migration", () => {
         await deployKeyless(signer, false);
         const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
         await proofOfBurn.deployed();
-        const registryContract = await new BLSAccountRegistry__factory(
+        const defaultRegistryContract = await new DefaultBLSAccountRegistry__factory(
             signer
         ).deploy(proofOfBurn.address);
+        const registryContract = BLSAccountRegistry__factory.connect(
+            defaultRegistryContract.address,
+            signer
+        );
 
         registry = await AccountRegistry.new(registryContract);
         users = Group.new({ n: 32, domain: DOMAIN });

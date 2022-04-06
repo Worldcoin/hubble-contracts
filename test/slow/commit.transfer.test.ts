@@ -1,8 +1,9 @@
 import {
+    BLSAccountRegistry__factory,
+    DefaultBLSAccountRegistry__factory,
     ProofOfBurn__factory,
     TestTransfer,
-    TestTransfer__factory,
-    BLSAccountRegistry__factory
+    TestTransfer__factory
 } from "../../types/ethers-contracts";
 import { serialize } from "../../ts/tx";
 import * as mcl from "../../ts/mcl";
@@ -35,9 +36,13 @@ describe("Rollup Transfer Commitment", () => {
         await deployKeyless(signer, false);
         const proofOfBurn = await new ProofOfBurn__factory(signer).deploy();
         await proofOfBurn.deployed();
-        const registryContract = await new BLSAccountRegistry__factory(
+        const defaultRegistryContract = await new DefaultBLSAccountRegistry__factory(
             signer
         ).deploy(proofOfBurn.address);
+        const registryContract = BLSAccountRegistry__factory.connect(
+            defaultRegistryContract.address,
+            signer
+        );
 
         registry = await AccountRegistry.new(registryContract);
         users = Group.new({ n: 32, domain: DOMAIN });

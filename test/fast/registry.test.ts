@@ -1,6 +1,7 @@
 import {
     BLSAccountRegistry,
-    BLSAccountRegistry__factory,
+    DefaultBLSAccountRegistry,
+    DefaultBLSAccountRegistry__factory,
     ProofOfBurn__factory
 } from "../../types/ethers-contracts";
 
@@ -29,7 +30,7 @@ function pubkeyToLeaf(uncompressedMcl: mcl.mclG2) {
 }
 
 describe("Registry", async () => {
-    let registry: BLSAccountRegistry;
+    let registry: DefaultBLSAccountRegistry;
     let treeLeft: MemoryTree;
     let treeRight: MemoryTree;
     beforeEach(async function() {
@@ -39,9 +40,9 @@ describe("Registry", async () => {
             accounts[0]
         ).deploy();
         await proofOfBurn.deployed();
-        registry = await new BLSAccountRegistry__factory(accounts[0]).deploy(
-            proofOfBurn.address
-        );
+        registry = await new DefaultBLSAccountRegistry__factory(
+            accounts[0]
+        ).deploy(proofOfBurn.address);
         DEPTH = (await registry.DEPTH()).toNumber();
         BATCH_DEPTH = (await registry.BATCH_DEPTH()).toNumber();
         hasher = Hasher.new("bytes", ZERO_BYTES32);
