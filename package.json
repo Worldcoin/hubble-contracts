@@ -64,7 +64,7 @@
     "fastify-cors": "^6.0.2",
     "level": "^7.0.0",
     "lodash": "^4.17.21",
-    "mcl-wasm": "0.4.5",
+    "mcl-wasm": "0.6.0",
     "minimist": "^1.2.5",
     "subleveldown": "^5.0.1"
   }
