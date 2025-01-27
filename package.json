@@ -59,7 +59,7 @@
   "dependencies": {
     "@godaddy/terminus": "^4.9.0",
     "bn.js": "^5.2.0",
-    "ethers": "5.5.4",
+    "ethers": "5.7.1",
     "fastify": "^3.18.0",
     "fastify-cors": "^6.0.2",
     "level": "^7.0.0",
